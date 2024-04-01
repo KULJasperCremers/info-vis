@@ -26,7 +26,8 @@ var colors = {
 };
 
 // Load the data and the map
-d3.json("../json/ess_data3.json").then(function(data) {
+// d3.json("../json/ess_data3.json").then(function(data) {
+d3.json("../json/ess_data_all.json").then(function(data) {
     d3.json("../json/geojson.json").then(function(geojson) {
         // Filter the GeoJSON data to only include European countries and exclude features outside the geographical range of mainland Europe
         geojson.features = geojson.features.filter(function(d) {
