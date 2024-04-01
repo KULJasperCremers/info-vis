@@ -112,7 +112,7 @@
                 "Ecolo": 6.1,
                 "Groen": 6.0,
                 "CDH": 3.7,
-                "Defi": 2.2,
+                "DeFI": 2.2,
                 "PP - Belgium": 1.1,
                 "Other parties": 3.1
             },
@@ -174,7 +174,7 @@
                 "MR": 11.4,
                 "CDH": 5.5,
                 "NVA": 3.1,
-                "ECOLO": 3.1,
+                "Ecolo": 3.1,
                 "Groen": 2.5,
                 "FN - Belgium": 2.0,
                 "PVDA - Belgium": 0.3,
@@ -217,7 +217,7 @@
         "election_data": {
             "2021": {
                 "SDP - Germany": 25.7,
-                "CDU": 19.0,
+                "CDU - Germany": 19.0,
                 "TG - Germany": 14.7,
                 "FDP": 11.4,
                 "AfG": 10.4,
@@ -231,7 +231,7 @@
                 "Other parties": 2.9
             },
             "2017": {
-                "CDU": 26.8,
+                "CDU - Germany": 26.8,
                 "SDP - Germany": 20.5,
                 "AfG": 12.6,
                 "FDP": 10.8,
@@ -245,7 +245,7 @@
                 "Other parties": 2.4
             },
             "2013": {
-                "CDU": 34.1,
+                "CDU - Germany": 34.1,
                 "SDP - Germany": 25.7,
                 "TL - Germany": 8.6,
                 "TG - Germany": 8.5,
@@ -259,11 +259,11 @@
                 "Other parties": 1.4
             },
             "2009": {
-                "CDU": 27.3,
+                "CDU - Germany": 27.3,
                 "SDP - Germany": 23.0,
                 "FDP": 14.6,
                 "TL - Germany": 11.9,
-                "TG": 10.7,
+                "TG - Germany": 10.7,
                 "CSU": 6.5,
                 "PPG": 2.0,
                 "NDP": 1.5,
@@ -272,7 +272,7 @@
             },
             "2005": {
                 "SDP - Germany": 34.3,
-                "CDU": 27.8,
+                "CDU - Germany": 27.8,
                 "FDP": 9.8,
                 "TL - Germany": 8.7,
                 "TG - Germany": 8.1,
@@ -283,7 +283,7 @@
             },
             "2002": {
                 "SDP - Germany": 39.0,
-                "CDU": 29.5,
+                "CDU - Germany": 29.5,
                 "CSU": 9.0,
                 "TG - Germany": 8.5,
                 "FDP": 7.4,
@@ -311,7 +311,7 @@
 
             ],
             "center-right": [
-                "CDU",
+                "CDU - Germany",
                 "CSU",
                 "FDP"
             ],
@@ -331,7 +331,7 @@
                 "SD - Denmark": 27.5,
                 "Venstre": 13.3,
                 "Moderat": 9.3,
-                "GL": 8.3,
+                "GL - Denmark": 8.3,
                 "DD": 8.1,
                 "LA - Denmark": 7.9,
                 "CPP": 5.5,
@@ -348,7 +348,7 @@
                 "Venstre": 23.4,
                 "DPP": 8.7,
                 "DSLP": 8.6,
-                "GL": 7.7,
+                "GL - Denmark": 7.7,
                 "R-G": 6.9,
                 "CPP": 6.6,
                 "TA": 3.0,
@@ -365,7 +365,7 @@
                 "LA - Denmark": 7.5,
                 "TA": 4.8,
                 "DSLP": 4.6,
-                "GL": 4.2,
+                "GL - Denmark": 4.2,
                 "CPP": 3.4,
                 "CD - Denmark": 0.8,
                 "Other parties": 0.0
@@ -375,7 +375,7 @@
                 "SD - Denmark": 24.8,
                 "DPP": 12.3,
                 "DSLP": 9.5,
-                "GL": 9.2,
+                "GL - Denmark": 9.2,
                 "R-G": 6.7,
                 "LA - Denmark": 5.0,
                 "CPP": 4.9,
@@ -386,7 +386,7 @@
                 "Venstre": 26.2,
                 "SD - Denmark": 25.5,
                 "DPP": 13.9,
-                "GL": 13.0,
+                "GL - Denmark": 13.0,
                 "CPP": 10.4,
                 "DSLP": 5.1,
                 "LA - Denmark": 2.8,
@@ -400,7 +400,7 @@
                 "DPP": 13.3,
                 "CPP": 10.3,
                 "DSLP": 9.2,
-                "GL": 6.0,
+                "GL - Denmark": 6.0,
                 "R-G": 3.4,
                 "CD - Denmark": 1.7,
                 "Other parties": 1.3
@@ -411,12 +411,11 @@
                 "R-G"
             ],
             "left": [
-                "GL",
+                "GL - Denmark",
                 "TA"
             ],
             "center-left": [
                 "SD - Denmark",
-                "GL",
                 "DSLP"
             ],
             "center": [],
@@ -675,7 +674,7 @@
                 "CC": 0.9,
                 "BNG": 0.8,
                 "AP": 0.7,
-                "Other parties": 0.5
+                "Other parties": 5.0
             }
         },
         "leaning_data": {
@@ -722,9 +721,9 @@
                 "NCP": 20.8,
                 "FP": 20.1,
                 "SDP - Finland": 20.0,
-                "CP": 11.3,
+                "CP - Finland": 11.3,
                 "LA - Finland": 7.1,
-                "GL": 7.0,
+                "GL - Finland": 7.0,
                 "SPP": 4.3,
                 "CD - Finland": 4.2,
                 "MN": 2.4,
@@ -739,8 +738,8 @@
                 "SDP - Finland": 17.7,
                 "FP": 17.5,
                 "NCP": 17.0,
-                "CP": 13.8,
-                "GL": 11.5,
+                "CP - Finland": 13.8,
+                "GL - Finland": 11.5,
                 "LA - Finland": 8.2,
                 "SPP": 4.5,
                 "CD - Finland": 3.9,
@@ -752,11 +751,11 @@
                 "Other parties": 1.7
             },
             "2015": {
-                "CP": 21.1,
+                "CP - Finland": 21.1,
                 "NCP": 18.2,
                 "FP": 17.7,
                 "SDP - Finland": 16.5,
-                "GL": 8.5,
+                "GL - Finland": 8.5,
                 "LA - Finland": 7.1,
                 "SPP": 4.9,
                 "CD - Finland": 3.5,
@@ -768,9 +767,9 @@
                 "NCP": 20.4,
                 "SDP - Finland": 19.1,
                 "TF": 19.1,
-                "CP": 15.8,
+                "CP - Finland": 15.8,
                 "LA - Finland": 8.1,
-                "GL": 7.3,
+                "GL - Finland": 7.3,
                 "SPP": 4.3,
                 "CD - Finland": 4.0,
                 "PP - Finland": 0.5,
@@ -779,11 +778,11 @@
                 "Other parties": 0.9
             },
             "2007": {
-                "CP": 23.1,
+                "CP - Finland": 23.1,
                 "NCP": 22.3,
                 "SDP - Finland": 21.4,
                 "LA - Finland": 8.8,
-                "GL": 8.5,
+                "GL - Finland": 8.5,
                 "CD - Finland": 4.9,
                 "SPP": 4.6,
                 "FP": 4.1,
@@ -792,11 +791,11 @@
                 "Other parties": 1.5
             },
             "2003": {
-                "CP": 24.7,
+                "CP - Finland": 24.7,
                 "SDP - Finland": 24.5,
                 "NCP": 18.6,
                 "LA - Finland": 9.9,
-                "GL": 8.0,
+                "GL - Finland": 8.0,
                 "CD - Finland": 5.3,
                 "SPP": 4.6,
                 "FP": 1.6,
@@ -816,10 +815,10 @@
             ],
             "center-left": [
                 "SDP - Finland",
-                "GL"
+                "GL - Finland"
             ],
             "center": [
-                "CP",
+                "CP - Finland",
                 "SPP"
             ],
             "center-right": [
@@ -834,7 +833,7 @@
             "far-right": [
                 "FP",
                 "TF",
-                "FcF",
+                "FfC",
                 "FA"
             ]
         }
@@ -1056,7 +1055,8 @@
             ],
             "center-left": [
                 "Labour",
-                "Green"
+                "Green",
+                "SD - Ireland"
             ],
             "center": [
                 "IA"
@@ -1081,7 +1081,7 @@
                 "PD": 19.0,
                 "M5S": 15.4,
                 "Lega": 8.8,
-                "FI": 8.1,
+                "FI - Italy": 8.1,
                 "A-IV": 7.8,
                 "AVS": 3.6,
                 "+E": 2.8,
@@ -1091,7 +1091,7 @@
                 "M5S": 32.7,
                 "PD": 18.8,
                 "Lega": 17.4,
-                "FI": 14.0,
+                "FI - Italy": 14.0,
                 "FdI": 4.4,
                 "LeU": 3.4,
                 "+E": 2.6,
@@ -1102,20 +1102,20 @@
             "2013": {
                 "M5S": 25.6,
                 "PD": 25.4,
-                "FI": 21.6,
+                "FI - Italy": 21.6,
                 "SC": 8.3,
-                "LN": 4.1,
+                "LN - Italy": 4.1,
                 "SEL": 3.2,
                 "RC": 2.3,
                 "FdI": 2.0,
                 "UDC - Italy": 1.8,
-                "FFD": 1.1,
+                "FFD - Italy": 1.1,
                 "Other parties": 4.6
             },
             "2008": {
-                "FI": 37.4,
+                "FI - Italy": 37.4,
                 "PD": 33.2,
-                "LN": 8.3,
+                "LN - Italy": 8.3,
                 "UDC - Italy": 5.6,
                 "IdV": 4.4,
                 "SA": 3.1,
@@ -1125,11 +1125,11 @@
             },
             "2006": {
                 "Ulivo": 31.3,
-                "FI": 23.7,
+                "FI - Italy": 23.7,
                 "AN": 12.3,
                 "UDC - Italy": 6.8,
                 "PRC": 5.8,
-                "LN": 4.6,
+                "LN - Italy": 4.6,
                 "RnP": 2.6,
                 "IdV": 2.3,
                 "PdCI": 2.3,
@@ -1167,16 +1167,16 @@
                 "A-IV"
             ],
             "center-right": [
-                "FI",
+                "FI - Italy",
                 "UDC - Italy",
-                "FFD",
+                "FFD - Italy",
                 "NcI"
             ],
             "right": [
                 "AN"
             ],
             "far-right": [
-                "LN",
+                "LN - Italy",
                 "LD-FT",
                 "FdI",
                 "Lega"
@@ -1190,52 +1190,71 @@
                 "LSWP": 18.9,
                 "DP": 18.7,
                 "ADRP": 9.3,
-                "TG - Luxemburg": 8.6,
+                "TG - Luxembourg": 8.6,
                 "PPL": 6.7,
                 "TL - Luxembourg": 3.9,
-                "Other parties": 4.7
+                "Fokus": 2.5,
+                "L-F": 1.1,
+                "CPoL": 0.6,
+                "Other parties": 0.5
             },
             "2018": {
                 "CSPP": 28.3,
                 "LSWP": 17.6,
                 "DP": 16.9,
-                "TG - Luxemburg": 15.1,
+                "TG - Luxembourg": 15.1,
                 "ADRP": 8.3,
                 "PPL": 6.5,
                 "TL - Luxembourg": 5.5,
-                "Other parties": 1.8
+                "CPoL": 1.3,
+                "Other parties": 0.5
             },
             "2013": {
                 "CSPP": 33.7,
                 "LSWP": 20.3,
                 "DP": 18.3,
-                "TG - Luxemburg": 10.1,
-                "ADRP": 6.6,
+                "TG - Luxembourg": 10.1,
+                "ADRP": 6.7,
                 "TL - Luxembourg": 4.9,
                 "PPL": 2.9,
-                "Other parties": 3.2
+                "CPoL": 1.6,
+                "Other parties": 1.5
             },
             "2009": {
                 "CSPP": 37.3,
                 "LSWP": 23,
                 "DP": 14.3,
-                "TG - Luxemburg": 11.5,
+                "TG - Luxembourg": 11.5,
                 "ADRP": 7.7,
                 "TL - Luxembourg": 3.6,
-                "Other parties": 2.6
+                "CPoL": 1.6,
+                "Other parties": 1
+            },
+            "2004": {
+                "CSPP": 35.8,
+                "LSWP": 25.4,
+                "DP": 14.9,
+                "TG - Luxembourg": 11.5,
+                "ADRP": 9.0,
+                "TL - Luxembourg": 2.0,
+                "CPoL": 1.2,
+                "Other parties": 0.2
             }
         },
         "leaning_data": {
             "far-left": [
-                "TL - Luxembourg"
+                "TL - Luxembourg",
+                "CPoL"
             ],
             "left": [],
             "center-left": [
                 "LSWP",
-                "TG - Luxemburg"
+                "TG - Luxembourg"
             ],
             "center": [
-                "PPL"
+                "PPL",
+                "L-F",
+                "Fokus"
             ],
             "center-right": [
                 "CSPP",
@@ -1251,14 +1270,24 @@
         "election_data": {
             "2023": {
                 "PVV": 23.5,
-                "GL/PvdA": 15.8,
+                "GL - PvdA": 15.8,
                 "VVD": 15.2,
                 "NSC": 12.9,
                 "D66": 6.3,
-                "BBB": 4.7,
+                "F-CM": 4.7,
                 "CDA": 3.3,
                 "SP - Netherlands": 3.2,
-                "Other parties": 15.1
+                "Denk": 2.4,
+                "PftA": 2.3,
+                "FfD - Netherlands": 2.2,
+                "RPP": 2.1,
+                "CU": 2.0,
+                "Volt": 1.7,
+                "JA21": 0.7,
+                "BvN": 0.5,
+                "50PLUS": 0.5,
+                "B1": 0.4,
+                "Other parties": 0.3
             },
             "2021": {
                 "VVD": 21.9,
@@ -1267,23 +1296,36 @@
                 "CDA": 9.5,
                 "SP - Netherlands": 6.0,
                 "PvdA - Netherlands": 5.7,
-                "GL": 5.2,
-                "FvD": 5.0,
-                "PvdD": 3.8,
+                "GL - Netherlands": 5.2,
+                "FfD - Netherlands": 5.0,
+                "PftA": 3.8,
                 "CU": 3.4,
-                "Other parties": 13.7
+                "Volt": 2.4,
+                "JA21": 2.4,
+                "RPP": 2.1,
+                "Denk": 2.0,
+                "50PLUS": 1.0,
+                "F-CM": 1.0,
+                "B1": 0.8,
+                "Other parties": 2.0
             },
             "2017": {
                 "VVD": 21.3,
                 "PVV": 13.1,
                 "CDA": 12.4,
                 "D66": 12.2,
-                "GL": 9.1,
+                "GL - Netherlands": 9.1,
                 "SP - Netherlands": 9.1,
                 "PvdA - Netherlands": 5.7,
                 "CU": 3.4,
-                "PvdD": 3.2,
-                "Other parties": 10.5
+                "PftA": 3.2,
+                "50PLUS": 3.1,
+                "RPP": 2.1,
+                "Denk": 2.1,
+                "FfD - Netherlands": 1.8,
+                "VN": 0.4,
+                "B1": 0.3,
+                "Other parties": 0.7
             },
             "2012": {
                 "VVD": 26.6,
@@ -1293,36 +1335,108 @@
                 "CDA": 8.5,
                 "D66": 8.0,
                 "CU": 3.1,
-                "Other parties": 9.2
+                "GL - Netherlands": 2.3,
+                "RPP": 2.1,
+                "PftA": 1.9,
+                "50PLUS": 1.9,
+                "Other parties": 1.0
+            },
+            "2010": {
+                "VVD": 20.5,
+                "PvdA - Netherlands": 19.6,
+                "PVV": 15.5,
+                "CDA": 13.6,
+                "SP - Netherlands": 9.8,
+                "D66": 7.0,
+                "GL - Netherlands": 6.7,
+                "CU": 3.2,
+                "RPP": 1.7,
+                "PftA": 1.3,
+                "Other parties": 1.1
+            }
+            ,
+            "2006": {
+                "CDA": 26.5,
+                "PvdA - Netherlands": 21.2,
+                "SP - Netherlands": 16.6,
+                "VVD": 14.7,
+                "PVV": 5.9,
+                "GL - Netherlands": 4.6,
+                "CU": 4.0,
+                "D66": 2.0,
+                "PftA": 1.8,
+                "RPP": 1.6,
+                "ONL": 0.6,
+                "LPF": 0.2,
+                "Other parties": 0.3
+            }
+            ,
+            "2003": {
+                "CDA": 28.6,
+                "PvdA - Netherlands": 27.3,
+                "VVD": 17.9,
+                "SP - Netherlands": 6.3,
+                "LPF": 5.7,
+                "GL - Netherlands": 5.1,
+                "D66": 4.1,
+                "CU": 2.1,
+                "RPP": 1.6,
+                "PftA": 0.5,
+                "LN - Netherlands": 0.4,
+                "Other parties": 0.4
+            },
+            "2002": {
+                "CDA": 27.9,
+                "LPF": 17.0,
+                "VVD": 15.4,
+                "PvdA - Netherlands": 15.1,
+                "GL - Netherlands": 7.0,
+                "SP - Netherlands": 5.9,
+                "D66": 5.1,
+                "CU": 2.5,
+                "RPP": 1.7,
+                "LN - Netherlands": 1.6,
+                "Other parties": 0.8
             }
         },
         "leaning_data": {
-            "far-left": [],
+            "far-left": [
+                "B1"
+            ],
             "left": [
-                "GL/PvdA",
                 "SP - Netherlands",
-                "GL",
-                "PvdD"
+                "GL - Netherlands",
+                "PftA",
+                "GL - PvdA"
             ],
             "center-left": [
                 "PvdA - Netherlands",
-                "GL"
+                "Denk"
             ],
             "center": [
-                "D66"
+                "LN - Netherlands",
+                "CU",
+                "D66",
+                "50PLUS",
+                "Volt"
             ],
             "center-right": [
                 "VVD",
-                "NSC",
                 "CDA",
-                "CU"
+                "NSC"
             ],
             "right": [
-                "BBB"
+                "LPF",
+                "RPP",
+                "ONL",
+                "VN",
+                "F-CM"
             ],
             "far-right": [
                 "PVV",
-                "FvD"
+                "FfD - Netherlands",
+                "JA21",
+                "BvN"
             ]
         }
     },
@@ -1330,22 +1444,36 @@
         "election_data": {
             "2024": {
                 "AD": 28.0,
-                "PS - Portugal": 28.0,
-                "CH": 18.1,
+                "PS - Portugal": 27.9,
+                "CHEGA": 18.1,
                 "IL": 4.9,
                 "BE": 4.4,
                 "CDU - Portugal": 3.2,
-                "L": 3.2,
-                "Other parties": 10.2
+                "LIVRE": 3.2,
+                "PAN": 2.0,
+                "ADN": 1.6,
+                "RIR": 0.4,
+                "PCTP/MRPP": 0.2,
+                "E": 0.1,
+                "Other parties": 6.0
             },
             "2022": {
                 "PS - Portugal": 41.4,
                 "PSD": 27.7,
-                "CH": 7.2,
+                "CHEGA": 7.2,
                 "IL": 4.9,
                 "BE": 4.4,
                 "CDU - Portugal": 4.3,
-                "Other parties": 9.9
+                "CDS-PP": 1.6,
+                "PAN": 1.6,
+                "LIVRE": 1.3,
+                "PaF": 0.9,
+                "AD": 0.5,
+                "RIR": 0.4,
+                "PCTP/MRPP": 0.2,
+                "ADN": 0.2,
+                "E": 0.1,
+                "Other parties": 3.3
             },
             "2019": {
                 "PS - Portugal": 36.4,
@@ -1354,111 +1482,206 @@
                 "CDU - Portugal": 6.3,
                 "CDS-PP": 4.2,
                 "PAN": 3.3,
-                "Other parties": 12.5
+                "CHEGA": 1.3,
+                "IL": 1.3,
+                "LIVRE": 1.1,
+                "A": 0.8,
+                "PCTP/MRPP": 0.7,
+                "RIR": 0.7,
+                "E": 0.3,
+                "ADN": 0.2,
+                "Other parties": 6.1
             },
             "2015": {
                 "PaF": 36.8,
                 "PS - Portugal": 32.3,
                 "BE": 10.2,
                 "CDU - Portugal": 8.3,
-                "Other parties": 12.4
+                "PSD": 1.5,
+                "PAN": 1.4,
+                "ADN": 1.1,
+                "PCTP/MRPP": 1.1,
+                "LIVRE": 0.7,
+                "E": 0.5,
+                "Other parties": 6.1
+            },
+            "2011": {
+                "PSD": 38.7,
+                "PS - Portugal": 28.1,
+                "CDS-PP": 11.7,
+                "CDU - Portugal": 7.9,
+                "BE": 5.2,
+                "PCTP/MRPP": 1.1,
+                "PAN": 1.0,
+                "HfPM": 0.4,
+                "PND": 0.2,
+                "Other parties": 5.7
+            },
+            "2009": {
+                "PS - Portugal": 36.6,
+                "PSD": 29.1,
+                "CDS-PP": 10.4,
+                "BE": 9.8,
+                "CDU - Portugal": 7.9,
+                "PCTP/MRPP": 0.9,
+                "HfPM": 0.5,
+                "PND": 0.4,
+                "Other parties": 4.4
+            },
+            "2005": {
+                "PS - Portugal": 45.0,
+                "PSD": 28.7,
+                "CDU - Portugal": 7.5,
+                "CDS-PP": 7.2,
+                "BE": 6.4,
+                "PCTP/MRPP": 0.8,
+                "PND": 0.7,
+                "Other parties": 3.7
+            },
+            "2002": {
+                "PSD": 40.2,
+                "PS - Portugal": 37.8,
+                "CDS-PP": 8.7,
+                "CDU - Portugal": 6.9,
+                "BE": 2.7,
+                "PCTP/MRPP": 0.7,
+                "Other parties": 3.0
             }
         },
         "leaning_data": {
             "far-left": [
-                "BE",
                 "CDU - Portugal",
-                "L"
+                "BE",
+                "PCTP/MRPP"
             ],
-            "left": [],
+            "left": [
+                "PAN",
+                "LIVRE"
+            ],
             "center-left": [
-                "PS - Portugal",
-                "PAN"
+                "PS - Portugal"
             ],
-            "center": [],
+            "center": [
+                "HfPM",
+                "RIR"
+            ],
             "center-right": [
-                "PSD"
+               "PSD",
+               "A",
+               "AD"
             ],
             "right": [
-                "AD",
-                "IL",
                 "CDS-PP",
+                "PND",
+                "IL",
                 "PaF"
             ],
             "far-right": [
-                "CH"
+                "ADN",
+                "E",
+                "CHEGA"
             ]
         }
     },
     "SE": {
         "election_data": {
             "2022": {
-                "SSDP": 28.3,
-                "MP": 19.9,
-                "SD": 17.5,
-                "CePa": 8.6,
-                "LP": 8.0,
-                "CrDe": 6.3,
-                "Lib": 5.5,
-                "GP": 4.4,
-                "Other parties": 1.5
+                "SSDP": 30.3,
+                "SD - Sweden": 20.5,
+                "MP": 19.1,
+                "LP": 6.8,
+                "CP - Sweden": 6.7,
+                "CD": 5.3,
+                "GP - Sweden": 5.1,
+                "LPP": 4.6,
+                "FI - Sweden": 0.05,
+                "Other parties": 1.55
             },
             "2018": {
                 "SSDP": 28.3,
                 "MP": 19.8,
                 "SD - Sweden": 17.5,
-                "CePa": 8.6,
+                "CP - Sweden": 8.6,
                 "LP": 8.0,
-                "CrDe": 6.3,
-                "Lib": 5.5,
-                "GP": 4.4,
-                "Other parties": 1.6
+                "CD": 6.3,
+                "LPP": 5.5,
+                "GP - Sweden": 4.4,
+                "FI - Sweden": 0.5,
+                "Other parties": 1.1
             },
             "2014": {
                 "SSDP": 31.0,
                 "MP": 23.3,
                 "SD - Sweden": 12.9,
-                "GP": 6.9,
-                "CePa": 6.1,
+                "GP - Sweden": 6.9,
+                "CP - Sweden": 6.1,
                 "LP": 5.7,
                 "LPP": 5.4,
-                "CrDe": 4.6,
-                "Other parties": 4.1
+                "CD": 4.6,
+                "FI - Sweden": 3.1,
+                "Other parties": 1.0
             },
             "2010": {
                 "SSDP": 30.7,
                 "MP": 30.0,
-                "GP": 7.3,
+                "GP - Sweden": 7.3,
                 "LPP": 7.1,
-                "CePa": 6.6,
+                "CP - Sweden": 6.6,
                 "SD - Sweden": 5.7,
                 "LP": 5.6,
-                "CrDe": 5.6,
-                "Other parties": 1.4
+                "CD": 5.6,
+                "FI - Sweden": 0.4,
+                "Other parties": 1.0
+            },
+            "2006": {
+                "SSDP": 35.0,
+                "MP": 26.2,
+                "CP - Sweden": 7.9,
+                "LPP": 7.5,
+                "CD": 6.6,
+                "LP": 5.9,
+                "GP - Sweden": 5.2,
+                "SD - Sweden": 2.9,
+                "FI - Sweden": 0.7,
+                "Other parties": 2.1
+            },
+            "2002": {
+                "SSDP": 39.9,
+                "MP": 15.3,
+                "LPP": 13.4,
+                "CD": 9.2,
+                "LP": 8.4,
+                "CP - Sweden": 6.2,
+                "GP - Sweden": 4.7,
+                "SD - Sweden": 1.4,
+                "Other parties": 1.5
             }
         },
         "leaning_data": {
-            "far-left": [],
+            "far-left": [
+
+            ],
             "left": [
-                "LP"
+                "LP",
+                "GP - Sweden",
+                "FI - Sweden"
             ],
             "center-left": [
-                "SSDP",
-                "SD - Sweden",
-                "GP"
+                "SSDP"
             ],
-            "center": [],
+            "center": [
+
+            ],
             "center-right": [
                 "MP",
-                "CePa",
-                "Lib",
-                "LPP"
+                "LPP",
+                "CP - Sweden"
             ],
             "right": [
-                "CrDe"
+                "CD"
             ],
             "far-right": [
-                "SD"
+                "SD - Sweden"
             ]
         }
     }
