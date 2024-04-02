@@ -32,12 +32,9 @@ d3.json("../json/ess_data_all.json").then(function(data) {
     var d0 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],0);
     // var d7 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],7);
     getGeoJsonData(d0).then(function(geojson) {
-        console.log(geojson);
     });
 
-    console.log(getLeaningDataAtIndex(data,countryCodes["Belgium"],0));
-
-    console.log(getAllCountriesLeaningDataAtIndex(data,7));
+    
 });
 
 // get the leaning data for all countries of a specific year (index)
@@ -144,4 +141,60 @@ function mapYears(data,countries) {
     });
 
     return years;
+}
+
+function getPercentageCircles(data, country, election, width, height) {
+    centerX = width / 2,
+    centerY = height / 2;
+
+    const layers = 5; // Number of layers
+    const maxCircles = 100; // Total circles
+    let currentLayer = 1;
+    let remainingCircles = maxCircles;
+
+    const layerRadiusIncrement = 30; // Adjust for spacing
+    let currentRadius = 100; // Initial radius of the innermost layer
+
+    var circlesColums = [];
+
+    while (currentLayer <= layers && remainingCircles > 0) {
+        const layerCircles = Math.ceil(remainingCircles / (layers - currentLayer + 1));
+        const angleIncrement = Math.PI / (layerCircles - 1); // Half circle
+
+        for (let i = 0; i < layerCircles; i++) {
+            const angle = angleIncrement * i;
+            const x = centerX + currentRadius * Math.cos(angle);
+            const y = centerY - currentRadius * Math.sin(angle);
+
+            // Ensure there's an array to push to for each column
+            if (!circlesColums[i]) {
+                circlesColums[i] = []; // Create a new column if it doesn't exist
+            }
+
+            circlesColums[i].push({ cx: x, cy: y, radius: 5, color: "steelblue", party: "" });
+        }
+
+        remainingCircles -= layerCircles;
+        currentLayer++;
+        currentRadius += layerRadiusIncrement;
+    }
+
+    const flattenedCircles = circlesColums.flat().reverse();
+
+    var leanings = getLeaningDataAtIndex(data, country, election)
+
+    var entry = 0;
+    Object.entries(leanings).forEach(([key, value]) => {
+        
+        for (let i = 0; i < value; i++) {
+
+            if (entry < flattenedCircles.length) {
+                flattenedCircles[entry].color = colors[key]
+                flattenedCircles[entry].party = key
+                entry += 1;
+            }
+        }
+    });
+
+    return flattenedCircles;
 }

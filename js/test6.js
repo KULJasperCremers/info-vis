@@ -118,13 +118,12 @@ d3.json("../json/ess_data3.json").then(function(cdata) {
                         .style('top', d3.event.pageY + 'px')
                         .style("height", values.length * 26.5 + 'px')
 
-                                // Update text content
                         d3.select("#tooltipText").html('<strong>' + d.properties.name + '</strong>');
 
                         // Clear previous graph
                         d3.select("#tooltipGraph").selectAll("*").remove();
 
-                        var graphHeight = values.length * 25; // 25 pixels per item for height + spacing
+                        var graphHeight = values.length * 25; 
                         d3.select("#tooltipGraph").attr("height", graphHeight);
 
 
@@ -147,8 +146,8 @@ d3.json("../json/ess_data3.json").then(function(cdata) {
                             return colorInterpolator(normalizedValue);
                         }
 
-                        const minValue = Math.min(...changes); // Arbitrary minimum
-                        const maxValue = Math.max(...changes); // Arbitrary maximum
+                        const minValue = Math.min(...changes);
+                        const maxValue = Math.max(...changes);
 
                         console.log(minValue, maxValue)
 
@@ -176,11 +175,10 @@ d3.json("../json/ess_data3.json").then(function(cdata) {
                             .enter()
                             .append("text")
                             .text(d => d)
-                            .attr("x", 0) // Position text at the start of each bar, adjust as needed
-                            .attr("y", (d, i) => i * 25 + 15) // Align text with bars, adjust as needed
-                            .attr("fill", "black") // Set text color
-                            .attr("font-size", "12px"); // Set text size
-
+                            .attr("x", 0) 
+                            .attr("y", (d, i) => i * 25 + 15)
+                            .attr("fill", "black")
+                            .attr("font-size", "12px");
 
 
                         d3.select(this).attr("fill", "blue");
