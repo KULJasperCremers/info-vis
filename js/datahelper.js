@@ -22,20 +22,16 @@ var dataTypes = {
     "survey": "ess_data"
 }
 
-d3.json("../json/ess_data_all.json").then(function(data) {
-    var countries = Object.keys(data);
-    var years = mapYears(data,countries);
-    console.log(years);
+var colors = {
+    'far-left': 'red',
+    'left': '#ff7f7f',
+    'center-left': '#ff4d4d',
+    'center': 'gray',
+    'center-right': '#4dff4d',
+    'right': '#7fff7f',
+    'far-right': 'green'
+};
 
-    getYearDataAtIndex(data,countryCodes["Belgium"],dataTypes["election"],0);
-
-    var d0 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],0);
-    // var d7 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],7);
-    getGeoJsonData(d0).then(function(geojson) {
-    });
-
-    
-});
 
 // get the leaning data for all countries of a specific year (index)
 // index: youngest data = 0, second youngest data = 1,...
