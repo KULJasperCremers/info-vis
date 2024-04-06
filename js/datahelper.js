@@ -19,9 +19,187 @@ var leanings = ["far-left", "left", "center-left", "center", "center-right", "ri
 
 var dataTypes = {
     "election": "election_data",
+    "leaning": "leaning_data",
     "survey": "ess_data"
 }
 
+d3.json("../json/ess_data_all.json").then(function(data) {
+    var countries = Object.keys(data);
+    var years = mapYears(data,countries);
+    console.log(years);
+    console.log(years["BE"].surveyYears);
+
+    console.log(getYearDataAtIndex(data,countryCodes["Belgium"],dataTypes["election"],0));
+
+    var d0 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],0);
+    // var d7 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],7);
+    getGeoJsonData(d0).then(function(geojson) {
+    });
+
+    // console.log(getYearDataAtIndex(data,countryCodes["Belgium"],dataTypes["survey"],0));
+    
+    // console.log(getLeaningDataAtIndex(data,countryCodes["Belgium"],0));
+    // console.log(getMostPopularLeaningData(data,countryCodes["Belgium"],0));
+    // console.log(getBestGrowingLeaningData(data,countryCodes["Belgium"],0));
+
+    var aggregatedsurveyData = aggregateSurveyData(data,years);
+    // console.log(aggregatedsurveyData);
+    var q1 = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes["Greece"],2,"happy");
+    console.log(q1);
+
+    var splittedSurveyData = splitSurveyData(data,years);
+    // console.log(splittedSurveyData);
+   var q2 = querySurveyDataCountryYearLeaningColumn(splittedSurveyData,years,countryCodes["Belgium"],0,"far-left","happy");
+   console.log(q2);
+});
+
+// query the aggregated survey data for a specific country, year and column
+function querySurveyDataCountryYearColumn(surveyData,mapYears,country,year,column) {
+    var y = mapYears[country].surveyYears[year];
+    return surveyData[country][y][column];
+}
+
+
+// query the splitted survey data for a specific country, year, leaning and column
+function querySurveyDataCountryYearLeaningColumn(surveyData,mapYears,country,year,leaning,column) {
+    var y = mapYears[country].surveyYears[year];
+    return surveyData[country][y][leaning].map(d => d[column]);
+}
+
+// split all the ess survey data for each country, each year and for each leaning
+// saves all rows (= 1 datapoint) that hold all the column values
+function splitSurveyData(data, mapYears) {
+    var countries = Object.keys(data);
+    var splitData = {};
+
+    countries.forEach(c => {
+        splitData[c] = {};
+        Object.keys(mapYears[c].surveyYears).forEach((i) => {
+            var y = mapYears[c].surveyYears[i];
+            splitData[c][y] = {                        
+                "far-left": [],
+                "left": [],
+                "center-left": [],
+                "center": [],
+                "center-right": [],
+                "right": [],
+                "far-right": []        
+            };
+
+            var surveyData = getYearDataAtIndex(data,c,dataTypes["survey"],i);
+            var rowLength = surveyData["leaning"].length;
+
+            for (var i=0; i<rowLength; i++) {
+                var row = {};
+                for (var column in surveyData) {
+                    row[column] = surveyData[column][i];
+                }
+
+                splitData[c][y][row["leaning"]].push(row);
+            }
+        });
+    });
+
+    return splitData; 
+}
+
+// return the best growing leaning for a specific country and year (= index)
+// compared to the previous year (= index+1)
+function getBestGrowingLeaningData(data,country,index) {
+    var leaningData = getLeaningDataAtIndex(data,country,index);
+    var previousLeaningData = getLeaningDataAtIndex(data,country,index+1);
+
+    var maxGrowth = 0;
+    var bestGrowingLeaning = "";
+    for (var leaning in leaningData) {
+        var growth = leaningData[leaning] - previousLeaningData[leaning];
+        if (growth > maxGrowth) {
+            maxGrowth = growth;
+            bestGrowingLeaning = leaning;
+        }
+    }
+
+    return bestGrowingLeaning;
+}
+
+// return the most popular leaning for a specific country and year (= index)
+function getMostPopularLeaningData(data,country,index) {
+    var leaningData = getLeaningDataAtIndex(data,country,index);
+    
+    var maxPercentage = 0;
+    var mostPopularLeaning = "";
+    for (var leaning in leaningData) {
+        if (leaningData[leaning] > maxPercentage) {
+            maxPercentage = leaningData[leaning];
+            mostPopularLeaning = leaning;
+        }
+    }
+
+    return mostPopularLeaning;
+}
+
+// aggregate all the ess survey data for each country, each year and for each column (leaning, happy, satisfaction, trust country & trust eu)
+// for leaning column returns the sum of each leaning
+// for numerical columns returns the sum of each score [0..10] and the mean
+function aggregateSurveyData(data, mapYears) {
+    var countries = Object.keys(data);
+    var aggregatedData = {};
+
+    countries.forEach(c => {
+        aggregatedData[c] = {};
+        Object.keys(mapYears[c].surveyYears).forEach((i) => {
+            var y = mapYears[c].surveyYears[i];
+            aggregatedData[c][y] = {};
+
+            var surveyData = getYearDataAtIndex(data,c,dataTypes["survey"],i);
+            for (var column in surveyData) {
+                var columnData = surveyData[column];
+
+                if (column === "leaning") {
+                    aggregatedData[c][y][column] = {
+                        "far-left": 0,
+                        "left": 0,
+                        "center-left": 0,
+                        "center": 0,
+                        "center-right": 0,
+                        "right": 0,
+                        "far-right": 0,
+                    };
+
+                    for (var i=0; i<columnData.length; i++) {
+                        aggregatedData[c][y][column][columnData[i]]++;
+                    }
+                } else {
+                    aggregatedData[c][y][column] = {
+                        "count": columnData.length,
+                        'sum': {
+                            '0': 0,
+                            '1': 0,
+                            '2': 0,
+                            '3': 0,
+                            '4': 0,
+                            '5': 0,
+                            '6': 0,
+                            '7': 0,
+                            '8': 0,
+                            '9': 0,
+                            '10': 0
+                        },
+                        "mean": 0
+                    };
+
+                    for (var i=0; i<columnData.length; i++) {
+                        aggregatedData[c][y][column]["sum"][columnData[i].toString()]++;
+                    }
+
+                    aggregatedData[c][y][column]["mean"] = columnData.reduce((a,b) => a+b,0) / columnData.length;
+                }
+            }
+        });
+    });
+
+    return aggregatedData;
+} 
 var colors = {
     'far-left': 'red',
     'left': '#ff7f7f',
@@ -131,11 +309,12 @@ function mapYears(data,countries) {
         var surveyYears = Object.keys(data[country]["ess_data"])
 
         years[country] = {
-            "electionYears": electionYears,
-            "surveyYears": surveyYears
+            "electionYears": electionYears.reverse(),
+            "surveyYears": surveyYears.reverse()
         };
     });
 
+    
     return years;
 }
 
