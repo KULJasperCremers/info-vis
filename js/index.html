@@ -15,15 +15,18 @@
 
     <h1 id="country"></h1>
     
-    <div class="container mt-3">
+    <div id="stuff" class="container mt-3">
         <!-- First Row -->
         <div class="row">
             <!-- Content for Row 1, Column 1 -->
-            <svg  class="col"width="400" height="400"></svg>
-        <div class="col">
-            <!-- Content for Row 1, Column 2 -->
-            Row 1, Column 2
-        </div>
+            <div class="col">
+                <div id="circles" class="col" ></div>
+
+            </div>
+            <div id="mostPopularLeaning" class="col">
+                <!-- Content for Row 1, Column 2 -->
+                Row 1, Column 2
+            </div>
         </div>
     
         <!-- Second Row -->
@@ -45,26 +48,6 @@
 <script src="map.js"></script>
 <script>
 
-    d3.json("../json/ess_data_all.json").then(function(cdata) {
-
-        const svg = d3.select("svg"),
-        width = +svg.attr("width"),
-        height = +svg.attr("height")
-
-        const flattenedCircles = getPercentageCircles(cdata, "BE", 0, width, height)
-
-        // Draw circles
-        svg.selectAll("circle")
-            .data(flattenedCircles)
-            .enter().append("circle")
-            .attr("cx", d => d.cx)
-            .attr("cy", d => d.cy)
-            .attr("r", d => d.radius)
-            .style("fill", (d, i) => d.color);
-    });
-
-
-
     var minimized = false;
     var selectedCountry = undefined; 
 
@@ -76,11 +59,10 @@
     function OnClickCountry(countryCode) {
         console.log("click: " + countryCode);
         
+        selectedCountry = countryCode;
+
         document.getElementById("country").innerText=countryCode;
-        if (minimized) {
-            selectedCountry = countryCode;
-        }
-        else {
+        if (!minimized) {
             SwitchMap();
         }
     }
@@ -102,6 +84,10 @@
             d3.select('#map').classed('minimized', false);
             d3.select('#map').classed('maximized', true);
 
+            document.getElementById('stuff').classList.add('hidden');
+
+            OnMaximized();
+
         } else {
             var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, 500, 300);
             d3.select('#map').classed('minimized', true);
@@ -117,7 +103,10 @@
                     SwitchMap();
                 });
 
-            }
+            document.getElementById('stuff').classList.remove('hidden');
+            
+            OnMinimized();
+        }
 
     }
 
@@ -125,6 +114,68 @@
         DrawMap();
     }, true);
   
+    function OnMinimized() {
+
+        d3.json("../json/ess_data_all.json").then(function(cdata) {
+
+            // First, select the div where you want to append the SVG
+            const div = d3.select("#circles");
+            
+            // Clear previous SVG if exists
+            div.selectAll("svg").remove();
+            
+            const svg = div.append("svg")
+            .attr("width", 400) // Set the width as needed or dynamically
+            .attr("height", 400) // Set the height as needed or dynamically
+            .style("border", "1px solid black"); // Optional: added a border to visualize the SVG area
+        
+            var countryCodes = {
+                "Austria": "AT",
+                "Belgium": "BE",
+                "Germany": "DE",
+                "Denmark": "DK",
+                "Greece": "EL",
+                "Spain": "ES",
+                "Finland": "FI",
+                "France": "FR",
+                "Ireland": "IE",
+                "Italy": "IT",
+                "Luxembourg": "LU",
+                "Netherlands": "NL",
+                "Portugal": "PT",
+                "Sweden": "SE",
+            }
+
+            const flattenedCircles = getPercentageCircles(cdata, countryCodes[selectedCountry], 0, 1000, 1000)
+
+            // Draw circles
+            svg.selectAll("circle")
+                .data(flattenedCircles)
+                .enter().append("circle")
+                .attr("cx", d => d.cx / 2)
+                .attr("cy", d => d.cy / 2)
+                .attr("r", d => d.radius)
+                .style("fill", (d, i) => d.color);
+            });
+     
+        d3.json("../json/ess_data_all.json").then(function(cdata) {
+
+            // First, select the div where you want to append the SVG
+            const div = d3.select("#mostPopularLeaning");
+
+            // Clear previous SVG if exists
+            div.selectAll("svg").remove();
+
+            const most = getLeaningDataAtIndex(cdata, countryCodes[selectedCountry], 0);
+            console.log(most)
+
+        });
+
+    }
+
+    function OnMaximized() {
+
+    }
 
 </script>
 
@@ -148,5 +199,8 @@
         height: 100vh; /* Example height - adjust as needed */
     }
 
+    .hidden {
+        display: none;
+    }
 
 </style>
