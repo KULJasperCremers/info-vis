@@ -26,10 +26,6 @@ var dataTypes = {
 d3.json("../json/ess_data_all.json").then(function(data) {
     var countries = Object.keys(data);
     var years = mapYears(data,countries);
-    console.log(years);
-    console.log(years["BE"].surveyYears);
-
-    console.log(getYearDataAtIndex(data,countryCodes["Belgium"],dataTypes["election"],0));
 
     var d0 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],0);
     // var d7 = getAllCountriesYearDataAtIndex(data,dataTypes["election"],7);
@@ -45,12 +41,10 @@ d3.json("../json/ess_data_all.json").then(function(data) {
     var aggregatedsurveyData = aggregateSurveyData(data,years);
     // console.log(aggregatedsurveyData);
     var q1 = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes["Greece"],2,"happy");
-    console.log(q1);
 
     var splittedSurveyData = splitSurveyData(data,years);
     // console.log(splittedSurveyData);
    var q2 = querySurveyDataCountryYearLeaningColumn(splittedSurveyData,years,countryCodes["Belgium"],0,"far-left","happy");
-   console.log(q2);
 });
 
 // query the aggregated survey data for a specific country, year and column
@@ -316,6 +310,11 @@ function mapYears(data,countries) {
 
     
     return years;
+}
+
+// get the # of election years and survey years for each country
+function getElectionYears(data, country) {
+    return  Object.keys(data[country]["election_data"]);
 }
 
 function getPercentageCircles(data, country, election, width, height) {
