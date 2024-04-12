@@ -23,6 +23,7 @@ var dataTypes = {
     "survey": "ess_data"
 }
 
+/*
 d3.json("../json/ess_data_all.json").then(function(data) {
     var countries = Object.keys(data);
     var years = mapYears(data,countries);
@@ -46,6 +47,8 @@ d3.json("../json/ess_data_all.json").then(function(data) {
     // console.log(splittedSurveyData);
    var q2 = querySurveyDataCountryYearLeaningColumn(splittedSurveyData,years,countryCodes["Belgium"],0,"far-left","happy");
 });
+
+*/
 
 // query the aggregated survey data for a specific country, year and column
 function querySurveyDataCountryYearColumn(surveyData,mapYears,country,year,column) {
