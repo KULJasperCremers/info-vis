@@ -258,17 +258,6 @@ function getPartyLeaning(data,party) {
     return null
 }
 
-// return the geojson data of the specified countries 
-function getGeoJsonData(countries) {
-    return d3.json("../json/geojson.json").then(function(geojson) {
-        geojson.features = geojson.features.map(function(d) {
-            return countries.hasOwnProperty(countryCodes[d.properties.name]);
-        });
-
-        return geojson;
-    });
-}
-
 // get the data for all countries, of a specific type and from a specific year (index)
 // index: youngest data = 0, second youngest data = 1,...
 function getAllCountriesYearDataAtIndex(data,type,index) {

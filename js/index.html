@@ -55,6 +55,11 @@
 <script src="map.js"></script>
 <script>
 
+    let cdata;
+    d3.json("../json/ess_data_all.json").then(function(d) {
+        cdata = d;
+    });
+
     var minimized = false;
     var selectedCountry = undefined; 
 
@@ -132,11 +137,9 @@
     function OnMinimized() {
 
         // Fill dropdown
-        d3.json("../json/ess_data_all.json").then(function(cdata) {
-            var years = getElectionYears(cdata, countryCodes[selectedCountry]);
-            selectedElectionYear = years[years.length - 1];
-            selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
-        });
+        var years = getElectionYears(cdata, countryCodes[selectedCountry]);
+        selectedElectionYear = years[years.length - 1];
+        selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
 
         OnReloadMinimized();
         
@@ -146,250 +149,236 @@
 
 
         // Fill dropdown
-        d3.json("../json/ess_data_all.json").then(function(cdata) {
-            var years = getElectionYears(cdata, countryCodes[selectedCountry]);
+        var years = getElectionYears(cdata, countryCodes[selectedCountry]);
 
-            selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
+        selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
 
-            console.log(selectedElectionYearIndex)
+        console.log(selectedElectionYearIndex)
 
-            d3.select("#yearsDropdown .dropdown-menu").selectAll('*').remove();
+        d3.select("#yearsDropdown .dropdown-menu").selectAll('*').remove();
 
-            $(years).each(function(index, year) {
-                $('#yearsDropdown .dropdown-menu').append(
-                    `<a class="dropdown-item" href="#">${year}</a>`
-                );
-            });
-            $('#dropdownMenuButton').text(selectedElectionYear);
+        $(years).each(function(index, year) {
+            $('#yearsDropdown .dropdown-menu').append(
+                `<a class="dropdown-item" href="#">${year}</a>`
+            );
+        });
+        $('#dropdownMenuButton').text(selectedElectionYear);
 
-            $('#yearsDropdown .dropdown-item').click(function() {
-                selectedElectionYear = $(this).text();
-                OnReloadMinimized(); // Change button text to the clicked item
-            });
-
+        $('#yearsDropdown .dropdown-item').click(function() {
+            selectedElectionYear = $(this).text();
+            OnReloadMinimized(); // Change button text to the clicked item
         });
 
         // Circles
-        d3.json("../json/ess_data_all.json").then(function(cdata) {
-
-            // First, select the div where you want to append the SVG
-            const div = d3.select("#circles");
-            
-            // Clear previous SVG if exists
-            div.selectAll("svg").remove();
-            
-            const svg = div.append("svg")
-            .attr("width", cellSize) 
-            .attr("height", cellSize)
-
-            const flattenedCircles = getPercentageCircles(cdata, countryCodes[selectedCountry], selectedElectionYearIndex, 1000, 1000)
-
-            // Draw circles
-            svg.selectAll("circle")
-                .data(flattenedCircles)
-                .enter().append("circle")
-                .attr("cx", d => d.cx / 2)
-                .attr("cy", d => d.cy / 2)
-                .attr("r", d => d.radius)
-                .style("fill", (d, i) => d.color);
+        // First, select the div where you want to append the SVG
+        const div1 = d3.select("#circles");
         
-        });
+        // Clear previous SVG if exists
+        div1.selectAll("svg").remove();
+        
+        const svg1 = div1.append("svg")
+        .attr("width", cellSize) 
+        .attr("height", cellSize)
+
+        const flattenedCircles = getPercentageCircles(cdata, countryCodes[selectedCountry], selectedElectionYearIndex, 1000, 1000)
+
+        // Draw circles
+        svg1.selectAll("circle")
+            .data(flattenedCircles)
+            .enter().append("circle")
+            .attr("cx", d => d.cx / 2)
+            .attr("cy", d => d.cy / 2)
+            .attr("r", d => d.radius)
+            .style("fill", (d, i) => d.color);
      
         // Barchart Leaning
-        d3.json("../json/ess_data_all.json").then(function(cdata) {
+        // First, select the div where you want to append the SVG
+        const div2 = d3.select("#mostPopularLeaning");
+        div2.selectAll("svg").remove();
 
-            // First, select the div where you want to append the SVG
-            const div = d3.select("#mostPopularLeaning");
-            div.selectAll("svg").remove();
-
-            const leaningData = getLeaningDataAtIndex(cdata, countryCodes[selectedCountry], selectedElectionYearIndex);
-            var data = Object.keys(leaningData).map(function(key) {
-                return { party: key, value: leaningData[key] };
-            });
-
-            console.log(data)
-
-            var svgWidth = cellSize, svgHeight = cellSize;
-            var margin = { top: 20, right: 20, bottom: 70, left: 50 };
-            var width = svgWidth - margin.left - margin.right;
-            var height = svgHeight - margin.top - margin.bottom;
-
-            var svg = d3.select('#mostPopularLeaning')
-            .append('svg')
-            .attr('width', svgWidth)
-            .attr('height', svgHeight)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-            var x = d3.scaleBand().range([0, width]).padding(0.1),
-            y = d3.scaleLinear().range([height, 0]);
-
-            x.domain(data.map(function(d) { return d.party; }));
-            y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-            svg.append('g')
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)");
-
-            svg.append('g')
-            .call(d3.axisLeft(y));
-
-            // Draw the bars
-            svg.selectAll('.bar')
-            .data(data)
-            .enter().append('rect')
-            .attr('class', 'bar')
-            .attr('x', function(d) { return x(d.party); })
-            .attr('y', function(d) { return y(d.value); })
-            .attr('width', x.bandwidth())
-            .attr('height', function(d) { return height - y(d.value); })
-            .attr('fill', 'steelblue');
-
-            svg.append("text")
-            .attr("class", "title")
-            .attr("x", width / 2)
-            .attr("y", 5) 
-            .attr("text-anchor", "middle")
-            .style("font-size", "1.5rem") 
-            .text("Leanings");
+        const leaningData = getLeaningDataAtIndex(cdata, countryCodes[selectedCountry], selectedElectionYearIndex);
+        var data = Object.keys(leaningData).map(function(key) {
+            return { party: key, value: leaningData[key] };
         });
+
+        console.log(data)
+
+        var svgWidth = cellSize, svgHeight = cellSize;
+        var margin = { top: 20, right: 20, bottom: 70, left: 50 };
+        var width = svgWidth - margin.left - margin.right;
+        var height = svgHeight - margin.top - margin.bottom;
+
+        var svg2 = d3.select('#mostPopularLeaning')
+        .append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        var x = d3.scaleBand().range([0, width]).padding(0.1),
+        y = d3.scaleLinear().range([height, 0]);
+
+        x.domain(data.map(function(d) { return d.party; }));
+        y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+        svg2.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
+
+        svg2.append('g')
+        .call(d3.axisLeft(y));
+
+        // Draw the bars
+        svg2.selectAll('.bar')
+        .data(data)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', function(d) { return x(d.party); })
+        .attr('y', function(d) { return y(d.value); })
+        .attr('width', x.bandwidth())
+        .attr('height', function(d) { return height - y(d.value); })
+        .attr('fill', 'steelblue');
+
+        svg2.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", 5) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "1.5rem") 
+        .text("Leanings");
 
         // Happiness
-        d3.json("../json/ess_data_all.json").then(function(cdata) {
-            var countries = Object.keys(cdata);
-            var years = mapYears(cdata,countries);
-            var aggregatedsurveyData = aggregateSurveyData(cdata,years);
-            // console.log(aggregatedsurveyData);
-            var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"happy")["sum"];
+        var countries = Object.keys(cdata);
+        var years = mapYears(cdata,countries);
+        var aggregatedsurveyData = aggregateSurveyData(cdata,years);
+        // console.log(aggregatedsurveyData);
+        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"happy")["sum"];
 
-            // First, select the div where you want to append the SVG
-            const div = d3.select("#happiness");
-            div.selectAll("svg").remove();
+        // First, select the div where you want to append the SVG
+        const div3 = d3.select("#happiness");
+        div3.selectAll("svg").remove();
 
-            var data = Object.keys(hapinessData).map(function(key) {
-                return { party: key, value: hapinessData[key] };
-            });
-
-            var svgWidth = cellSize, svgHeight = cellSize;
-            var margin = { top: 20, right: 20, bottom: 70, left: 50 };
-            var width = svgWidth - margin.left - margin.right;
-            var height = svgHeight - margin.top - margin.bottom;
-
-            var svg = d3.select('#happiness')
-            .append('svg')
-            .attr('width', svgWidth)
-            .attr('height', svgHeight)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-            var x = d3.scaleBand().range([0, width]).padding(0.1),
-            y = d3.scaleLinear().range([height, 0]);
-
-            x.domain(data.map(function(d) { return d.party; }));
-            y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-            svg.append('g')
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)");
-
-            svg.append('g')
-            .call(d3.axisLeft(y));
-
-            // Draw the bars
-            svg.selectAll('.bar')
-            .data(data)
-            .enter().append('rect')
-            .attr('class', 'bar')
-            .attr('x', function(d) { return x(d.party); })
-            .attr('y', function(d) { return y(d.value); })
-            .attr('width', x.bandwidth())
-            .attr('height', function(d) { return height - y(d.value); })
-            .attr('fill', 'steelblue');
-
-            svg.append("text")
-            .attr("class", "title")
-            .attr("x", width / 2)
-            .attr("y", 5) 
-            .attr("text-anchor", "middle")
-            .style("font-size", "1.5rem")  
-            .text("Hapiness");
+        var data = Object.keys(hapinessData).map(function(key) {
+            return { party: key, value: hapinessData[key] };
         });
 
-         // Happiness
-         d3.json("../json/ess_data_all.json").then(function(cdata) {
-            var countries = Object.keys(cdata);
-            var years = mapYears(cdata,countries);
-            var aggregatedsurveyData = aggregateSurveyData(cdata,years);
-            // console.log(aggregatedsurveyData);
-            var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"satisfaction")["sum"];
+        var svgWidth = cellSize, svgHeight = cellSize;
+        var margin = { top: 20, right: 20, bottom: 70, left: 50 };
+        var width = svgWidth - margin.left - margin.right;
+        var height = svgHeight - margin.top - margin.bottom;
 
-            // First, select the div where you want to append the SVG
-            const div = d3.select("#satisfaction");
-            div.selectAll("svg").remove();
+        var svg3 = d3.select('#happiness')
+        .append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            var data = Object.keys(hapinessData).map(function(key) {
-                return { party: key, value: hapinessData[key] };
-            });
+        var x = d3.scaleBand().range([0, width]).padding(0.1),
+        y = d3.scaleLinear().range([height, 0]);
 
-            var svgWidth = cellSize, svgHeight = cellSize;
-            var margin = { top: 20, right: 20, bottom: 70, left: 50 };
-            var width = svgWidth - margin.left - margin.right;
-            var height = svgHeight - margin.top - margin.bottom;
+        x.domain(data.map(function(d) { return d.party; }));
+        y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
-            var svg = d3.select('#satisfaction')
-            .append('svg')
-            .attr('width', svgWidth)
-            .attr('height', svgHeight)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        svg3.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
 
-            var x = d3.scaleBand().range([0, width]).padding(0.1),
-            y = d3.scaleLinear().range([height, 0]);
+        svg3.append('g')
+        .call(d3.axisLeft(y));
 
-            x.domain(data.map(function(d) { return d.party; }));
-            y.domain([0, d3.max(data, function(d) { return d.value; })]);
+        // Draw the bars
+        svg3.selectAll('.bar')
+        .data(data)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', function(d) { return x(d.party); })
+        .attr('y', function(d) { return y(d.value); })
+        .attr('width', x.bandwidth())
+        .attr('height', function(d) { return height - y(d.value); })
+        .attr('fill', 'steelblue');
 
-            svg.append('g')
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)");
+        svg3.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", 5) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "1.5rem")  
+        .text("Hapiness");
 
-            svg.append('g')
-            .call(d3.axisLeft(y));
+         // Satisfaction
+        var countries = Object.keys(cdata);
+        var years = mapYears(cdata,countries);
+        var aggregatedsurveyData = aggregateSurveyData(cdata,years);
+        // console.log(aggregatedsurveyData);
+        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"satisfaction")["sum"];
 
-            // Draw the bars
-            svg.selectAll('.bar')
-            .data(data)
-            .enter().append('rect')
-            .attr('class', 'bar')
-            .attr('x', function(d) { return x(d.party); })
-            .attr('y', function(d) { return y(d.value); })
-            .attr('width', x.bandwidth())
-            .attr('height', function(d) { return height - y(d.value); })
-            .attr('fill', 'steelblue');
+        // First, select the div where you want to append the SVG
+        const div4 = d3.select("#satisfaction");
+        div4.selectAll("svg").remove();
 
-            svg.append("text")
-            .attr("class", "title")
-            .attr("x", width / 2)
-            .attr("y", 5) 
-            .attr("text-anchor", "middle")
-            .style("font-size", "1.5rem") 
-            .text("Satisfaction");
+        var data = Object.keys(hapinessData).map(function(key) {
+            return { party: key, value: hapinessData[key] };
         });
+
+        var svgWidth = cellSize, svgHeight = cellSize;
+        var margin = { top: 20, right: 20, bottom: 70, left: 50 };
+        var width = svgWidth - margin.left - margin.right;
+        var height = svgHeight - margin.top - margin.bottom;
+
+        var svg4 = d3.select('#satisfaction')
+        .append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        var x = d3.scaleBand().range([0, width]).padding(0.1),
+        y = d3.scaleLinear().range([height, 0]);
+
+        x.domain(data.map(function(d) { return d.party; }));
+        y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+        svg4.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
+
+        svg4.append('g')
+        .call(d3.axisLeft(y));
+
+        // Draw the bars
+        svg4.selectAll('.bar')
+        .data(data)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', function(d) { return x(d.party); })
+        .attr('y', function(d) { return y(d.value); })
+        .attr('width', x.bandwidth())
+        .attr('height', function(d) { return height - y(d.value); })
+        .attr('fill', 'steelblue');
+
+        svg4.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", 5) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "1.5rem") 
+        .text("Satisfaction");
 
     }
 

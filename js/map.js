@@ -1,3 +1,20 @@
+var countryCodes = {
+    "Austria": "AT",
+    "Belgium": "BE",
+    "Germany": "DE",
+    "Denmark": "DK",
+    "Greece": "EL",
+    "Spain": "ES",
+    "Finland": "FI",
+    "France": "FR",
+    "Ireland": "IE",
+    "Italy": "IT",
+    "Luxembourg": "LU",
+    "Netherlands": "NL",
+    "Portugal": "PT",
+    "Sweden": "SE",
+}
+
 function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, width = 900, height = 500) {
 
     let svg = d3.select(htmlId).append("svg")
@@ -11,12 +28,17 @@ function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, width = 900, 
 
 
     let pathGenerator = d3.geoPath().projection(europeProjection)
-    let geoJsonUrl = "https://gist.githubusercontent.com/spiker830/3eab0cb407031bf9f2286f98b9d0558a/raw/7edae936285e77be675366550e20f9166bed0ed5/europe_features.json"
+    let geoJsonUrl = "../json/geojson.json"
 
         
     // Request the GeoJSON
     d3.json("../json/ess_data3.json").then(function(cdata) {
         d3.json(geoJsonUrl).then(geojson => {
+            geojson.features = geojson.features.filter(function(d) {
+
+                return cdata.hasOwnProperty(countryCodes[d.properties.name]);
+            });
+    
             svg.selectAll("path")
             .data(geojson.features)
             .enter()
