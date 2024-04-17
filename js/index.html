@@ -28,6 +28,14 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 </div>
             </div>
+
+            <div class="dropdown" id="yearsDropdown2">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown button
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                </div>
+            </div>
         </div>
         
         <!-- First Row -->
@@ -63,8 +71,11 @@
     var minimized = false;
     var selectedCountry = undefined; 
 
-    var selectedElectionYear = undefined;
-    var selectedElectionYearIndex = 0;
+    var selectedElectionYear_To = undefined;
+    var selectedElectionYearIndex_To = 0;
+
+    var selectedElectionYear_From = undefined;
+    var selectedElectionYearIndex_From = 0;
 
     var cellSize = 400;
 
@@ -138,22 +149,25 @@
 
         // Fill dropdown
         var years = getElectionYears(cdata, countryCodes[selectedCountry]);
-        selectedElectionYear = years[years.length - 1];
-        selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
+        selectedElectionYear_To = years[years.length - 1];
+        selectedElectionYearIndex_To = years.length - years.indexOf(selectedElectionYear_To) - 1;
 
         OnReloadMinimized();
-        
     }
 
     function OnReloadMinimized() {
 
-
         // Fill dropdown
         var years = getElectionYears(cdata, countryCodes[selectedCountry]);
 
-        selectedElectionYearIndex = years.length - years.indexOf(selectedElectionYear) - 1;
+        selectedElectionYearIndex_To = years.length - years.indexOf(selectedElectionYear_To) - 1;
 
-        console.log(selectedElectionYearIndex)
+        if (selectedElectionYearIndex_From !== undefined) {
+            selectedElectionYearIndex_From = years.length - years.indexOf(selectedElectionYear_From) - 1;
+        }
+
+
+        console.log(selectedElectionYearIndex_To)
 
         d3.select("#yearsDropdown .dropdown-menu").selectAll('*').remove();
 
@@ -162,25 +176,53 @@
                 `<a class="dropdown-item" href="#">${year}</a>`
             );
         });
-        $('#dropdownMenuButton').text(selectedElectionYear);
+        $('#dropdownMenuButton').text(selectedElectionYear_To);
 
         $('#yearsDropdown .dropdown-item').click(function() {
-            selectedElectionYear = $(this).text();
+            selectedElectionYear_To = $(this).text();
             OnReloadMinimized(); // Change button text to the clicked item
         });
 
+        
+        d3.select("#yearsDropdown2 .dropdown-menu").selectAll('*').remove();
+
+        $(years).each(function(index, year) {
+            $('#yearsDropdown2 .dropdown-menu').append(
+                `<a class="dropdown-item" href="#">${year}</a>`
+            );
+        });
+        $('#dropdownMenuButton2').text(selectedElectionYear_From);
+
+        $('#yearsDropdown2 .dropdown-item').click(function() {
+            selectedElectionYear_From = $(this).text();
+            console.log("test: "  +selectedElectionYear_From)
+            OnReloadMinimized(); // Change button text to the clicked item
+        });
+
+        console.log(selectedElectionYear_From);
+
+        if (selectedElectionYear_From === undefined) {
+            OnMinimizedOneElectionSelected();
+        }
+        else {
+            OnMinimizedTwoElectionSelected();
+        }
+    }
+
+    function OnMinimizedOneElectionSelected() {
         // Circles
         // First, select the div where you want to append the SVG
+
+        clearMinimizedCharts();
+
+
         const div1 = d3.select("#circles");
-        
-        // Clear previous SVG if exists
-        div1.selectAll("svg").remove();
         
         const svg1 = div1.append("svg")
         .attr("width", cellSize) 
         .attr("height", cellSize)
 
-        const flattenedCircles = getPercentageCircles(cdata, countryCodes[selectedCountry], selectedElectionYearIndex, 1000, 1000)
+        const flattenedCircles = getPercentageCircles(cdata, countryCodes[selectedCountry], selectedElectionYearIndex_To, 1000, 1000)
 
         // Draw circles
         svg1.selectAll("circle")
@@ -194,9 +236,8 @@
         // Barchart Leaning
         // First, select the div where you want to append the SVG
         const div2 = d3.select("#mostPopularLeaning");
-        div2.selectAll("svg").remove();
-
-        const leaningData = getLeaningDataAtIndex(cdata, countryCodes[selectedCountry], selectedElectionYearIndex);
+ 
+        const leaningData = getLeaningDataAtIndex(cdata, countryCodes[selectedCountry], selectedElectionYearIndex_To);
         var data = Object.keys(leaningData).map(function(key) {
             return { party: key, value: leaningData[key] };
         });
@@ -257,11 +298,10 @@
         var years = mapYears(cdata,countries);
         var aggregatedsurveyData = aggregateSurveyData(cdata,years);
         // console.log(aggregatedsurveyData);
-        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"happy")["sum"];
+        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_To,"happy")["sum"];
 
         // First, select the div where you want to append the SVG
         const div3 = d3.select("#happiness");
-        div3.selectAll("svg").remove();
 
         var data = Object.keys(hapinessData).map(function(key) {
             return { party: key, value: hapinessData[key] };
@@ -321,11 +361,10 @@
         var years = mapYears(cdata,countries);
         var aggregatedsurveyData = aggregateSurveyData(cdata,years);
         // console.log(aggregatedsurveyData);
-        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex,"satisfaction")["sum"];
+        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_To,"satisfaction")["sum"];
 
         // First, select the div where you want to append the SVG
         const div4 = d3.select("#satisfaction");
-        div4.selectAll("svg").remove();
 
         var data = Object.keys(hapinessData).map(function(key) {
             return { party: key, value: hapinessData[key] };
@@ -382,8 +421,132 @@
 
     }
 
+    function OnMinimizedTwoElectionSelected() {
+
+        clearMinimizedCharts();
+
+          // Satisfaction trend
+        var countries = Object.keys(cdata);
+        var years = mapYears(cdata,countries);
+        var aggregatedsurveyData = aggregateSurveyData(cdata,years);
+        // console.log(aggregatedsurveyData);
+
+        var hapinessDataFrom = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_From,"satisfaction")["sum"];
+        var hapinessDataTo =  querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_To,"satisfaction")["sum"];
+
+        var totalFrom = 0;
+        var totalTo = 0;
+        for (let i = 0; i < 10; i++) {
+            totalFrom += hapinessDataFrom[i];
+            totalTo += hapinessDataTo[i];
+        }
+
+        console.log(totalFrom);
+        console.log(totalTo);
+
+        console.log(selectedElectionYearIndex_From)
+        console.log(selectedElectionYearIndex_To)
+
+        console.log(hapinessDataFrom);
+        console.log(hapinessDataTo);
+
+        var data = Object.keys(hapinessDataFrom).map(function(key) {
+            return { party: key, value: ((hapinessDataTo[key] / totalTo) - (hapinessDataFrom[key] / totalFrom)) * 100 };
+        });
+
+
+        // First, select the div where you want to append the SVG
+        const div4 = d3.select("#satisfaction");
+        div4.selectAll("svg").remove();
+
+        var svgWidth = cellSize, svgHeight = cellSize;
+        var margin = { top: 20, right: 20, bottom: 70, left: 50 };
+        var width = svgWidth - margin.left - margin.right;
+        var height = svgHeight - margin.top - margin.bottom;
+
+        var svg4 = d3.select('#satisfaction')
+        .append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        var x = d3.scaleBand().range([0, width]).padding(0.1),
+        y = d3.scaleLinear().range([height, 0]);
+
+        x.domain(data.map(function(d) { return d.party; }));
+        y.domain([d3.min(data, function(d) { return d.value; }), d3.max(data, function(d) { return d.value; })]);
+
+        svg4.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
+
+        svg4.append('g')
+        .call(d3.axisLeft(y));
+
+        // Draw the bars
+        svg4.selectAll('.bar')
+        .data(data)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', function(d) { return x(d.party); })
+        .attr('y', function(d) {
+            // Position starts from zero or from the value depending on the sign
+            return d.value > 0 ? y(d.value) : y(0);
+        })
+        .attr('width', x.bandwidth())
+        .attr('height', function(d) {
+            // Height is the absolute distance between the value and zero
+            return Math.abs(y(d.value) - y(0));
+        })
+        .attr('fill', function(d) {
+            // Color the bar green if positive, red if negative
+            return d.value > 0 ? "green" : "red";
+        });
+
+        svg4.append("line")
+        .style("stroke", "black")  
+        .style("stroke-width", 1)  
+        .attr("x1", 0)             
+        .attr("y1", y(0))          
+        .attr("x2", width)         
+        .attr("y2", y(0)); 
+
+        svg4.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", 5) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "1.5rem") 
+        .text("Satisfaction");
+
+
+    }
+
     function OnMaximized() {
 
+
+        
+
+    }
+
+    function clearMinimizedCharts() {
+        const div1 = d3.select("#circles");
+        div1.selectAll("svg").remove();        
+
+        const div2 = d3.select("#mostPopularLeaning");
+                div2.selectAll("svg").remove();       
+
+        const div3 = d3.select("#happiness");
+                div3.selectAll("svg").remove();     
+
+        const div4 = d3.select("#satisfaction");
+                div4.selectAll("svg").remove();
     }
 
 </script>
