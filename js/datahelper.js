@@ -17,6 +17,10 @@ var countryCodes = {
 
 var leanings = ["far-left", "left", "center-left", "center", "center-right", "right", "far-right", "Other parties"];
 
+var leanings_ess = ["far-left", "far-left", "left", "left", "center-left", "center", "center-right", "right", "right", "far-right", "far-right"];
+var leanings_ess_indices = [0, 0, 1, 1, 2, 3, 4, 5, 5, 6, 6];
+
+
 var dataTypes = {
     "election": "election_data",
     "leaning": "leaning_data",
