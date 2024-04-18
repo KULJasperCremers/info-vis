@@ -197,14 +197,15 @@ function aggregateSurveyData(data, mapYears) {
 
     return aggregatedData;
 } 
+
 var colors = {
-    'far-left': 'red',
-    'left': '#ff7f7f',
-    'center-left': '#ff4d4d',
-    'center': 'gray',
-    'center-right': '#4dff4d',
-    'right': '#7fff7f',
-    'far-right': 'green'
+    'far-left': '#ff0000', // bright red
+    'left': '#ff7f7f', // lighter red
+    'center-left': '#ffc0c0', // even lighter red
+    'center': '#808080', // gray
+    'center-right': '#c0c0ff', // light blue
+    'right': '#7f7fff', // darker blue
+    'far-right': '#0000ff' // bright blue
 };
 
 
