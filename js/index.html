@@ -98,8 +98,14 @@
 <script>
 
     let cdata;
+    let aggregatedsurveyData;
+    let years;
+    let countries;
     d3.json("../json/ess_data_all.json").then(function(d) {
         cdata = d;
+        countries = Object.keys(cdata);
+        years = mapYears(cdata,countries);
+        aggregatedsurveyData = aggregateSurveyData(cdata,years);
     });
 
     var minimized = false;
@@ -155,6 +161,28 @@
         DrawMap();
     }
 
+    function countryColorFunc(country) {
+        let dis = getHighestCountryDistribution(country, "trust_country");
+        return interpolateRedGreen(dis);
+    }
+
+    function interpolateRedGreen(t) {
+        if (t < 0 || t > 1) {
+            return 'Value must be between 0 and 1';
+        }
+
+        // Calculate red and green components
+        const red = 255 * (1 - t);
+        const green = 255 * t;
+
+        // Convert each component to an integer
+        const r = Math.round(red);
+        const g = Math.round(green);
+
+        // Return the color in hexadecimal format
+        return `rgb(${r}, ${g}, 0)`;
+    }
+
     function DrawMap() {
         d3.select('#map_big').selectAll('*').remove();
         d3.select('#map_small').selectAll('*').remove();
@@ -164,7 +192,7 @@
             var w = window.innerWidth * 0.8;
             var h = w / 2;
 
-            var svg = AppendMap('#map_big', OnHoverCountry, OnClickCountry, w, h);
+            var svg = AppendMap('#map_big', OnHoverCountry, OnClickCountry, countryColorFunc, w, h);
             d3.select('#map_big').classed('minimized', false);
             d3.select('#map_big').classed('maximized', true);
 
@@ -174,7 +202,7 @@
             OnMaximized();
 
         } else {
-            var svg = AppendMap('#map_small', OnHoverCountry, OnClickCountry, 280, 200);
+            var svg = AppendMap('#map_small', OnHoverCountry, OnClickCountry, undefined, 280, 200);
             d3.select('#map_small').classed('minimized', true);
             d3.select('#map_small').classed('maximized', false);
 

@@ -15,7 +15,7 @@ var countryCodes = {
     "Sweden": "SE",
 }
 
-function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, width = 900, height = 500) {
+function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, colorFunc = undefined, width = 900, height = 500) {
 
     let svg = d3.select(htmlId).append("svg")
     .attr("width", width)
@@ -41,7 +41,13 @@ function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, width = 900, 
             .attr("d", pathGenerator)
             .attr("stroke", "grey")
             .attr("fill", function(d) {
-                return countryCodes.hasOwnProperty(d.properties.name) ? "white" : "rgba(211, 211, 211, 1)";
+                var countryExists = countryCodes.hasOwnProperty(d.properties.name);
+                if (colorFunc !== undefined && countryExists) {
+                    return colorFunc(d.properties.name);
+                }
+                else {
+                    return countryExists ? "white" : "rgba(211, 211, 211, 1)";
+                }
             })
             .each(function(d) {
                 if (countryCodes.hasOwnProperty(d.properties.name)) {

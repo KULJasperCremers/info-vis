@@ -368,3 +368,53 @@ function getPercentageCircles(data, country, election, width, height) {
 
     return flattenedCircles;
 }
+
+function getHighestCountryDistribution(country, category) {
+
+    console.log(country)
+    var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[country],selectedElectionYearIndex_To, category)["sum"];
+
+    // Calculate the total number of votes
+    const totalVotes = Object.values(hapinessData).reduce((acc, value) => acc + value, 0);
+
+    // Calculate the weighted mean of votes
+    let weightedSum = 0;
+    Object.entries(hapinessData).forEach(([index, value]) => {
+        weightedSum += index * value;  // assuming index as weight
+    });
+    const mean = weightedSum / totalVotes;
+
+    // Calculate the variance
+    let varianceSum = 0;
+    Object.entries(hapinessData).forEach(([index, value]) => {
+        const difference = index - mean;
+        varianceSum += difference * difference * value;  // weight by the number of votes at each index
+    });
+    const variance = varianceSum / totalVotes;
+
+    // Calculate the standard deviation
+    const standardDeviation = Math.sqrt(variance);
+
+    const lowerBound = mean - standardDeviation;
+    const upperBound = mean + standardDeviation;
+
+    const keysWithinRange = [];
+    Object.entries(hapinessData).forEach(([index, value]) => {
+    const idx = parseInt(index);
+    if (idx >= lowerBound && idx <= upperBound) {
+        keysWithinRange.push({index: idx, votes: value});
+    }
+    });
+
+    // Sort keys by the number of votes to find highest concentrations
+    keysWithinRange.sort((a, b) => b.votes - a.votes);
+
+    // Identify highest concentration area
+    if (keysWithinRange.length > 0) {
+        var highestDistributionKey = keysWithinRange[0].index;
+        var normalized = highestDistributionKey / 10;
+        return normalized;
+    } else {
+        return 0;
+    }
+}
