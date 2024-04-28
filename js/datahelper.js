@@ -369,10 +369,16 @@ function getPercentageCircles(data, country, election, width, height) {
     return flattenedCircles;
 }
 
-function getHighestCountryDistribution(country, category) {
+function getHighestCountryDistribution(country, category, electionIndex) {
 
-    console.log(country)
-    var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[country],selectedElectionYearIndex_To, category)["sum"];
+    try {
+        var hapinessData = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[country], electionIndex, category)["sum"];
+
+      } catch (error) {
+        return -1;
+      }
+      
+
 
     // Calculate the total number of votes
     const totalVotes = Object.values(hapinessData).reduce((acc, value) => acc + value, 0);

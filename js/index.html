@@ -17,8 +17,21 @@
     <div id="maximized_screen" class="container mt-3" >
         
         <div class="row">
-            <div class="col">
-            <h1 class="text-center chart">Something</h1>
+            <div class="col chart">
+            <h1 class="text-center">Something</h1>
+
+            <p style="padding-left: 20px;">Visualise:</p>
+            <div class="dropdown" id="dropdownBigMap" style="padding-left: 10px;">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownBigMap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown button
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonBigMap">
+                    
+                </div>
+            </div>
+
+            <label for="mapRangeSlider" class="form-label">Range</label>
+            <input type="range" class="form-range" id="mapRangeSlider" min="0" max="8">
         </div>
         </div>
         <div class="row">
@@ -117,11 +130,80 @@
     var selectedElectionYear_From = undefined;
     var selectedElectionYearIndex_From = 0;
 
+    var selectedElectionYear_SliderValue = 0;
+
+
     var cellSize = 400;
+
+    const visualiseCategories = {
+        "Satisfaction": countrySatisfactionColorFunc,
+        "Trust Country": countryTrustColorFunc,
+        "Trust EU": countryTrustEUColorFunc,
+        "Happiness": countryHappyColorFunc
+    }
+
+    var selectedVisualiseCategory = "Satisfaction";
+
+
+    function countrySatisfactionColorFunc(country) {
+        let dis = getHighestCountryDistribution(country, "satisfaction", selectedElectionYear_SliderValue);
+        if (dis === -1) {
+            return "rgba(211, 211, 211, 1)";
+        }
+        return interpolateRedGreen(dis);
+    }
+
+    function countryTrustColorFunc(country) {
+        let dis = getHighestCountryDistribution(country, "trust_country", selectedElectionYear_SliderValue);
+        if (dis === -1) {
+            return "rgba(211, 211, 211, 1)";
+        }
+        return interpolateRedGreen(dis);
+    }
+
+    function countryTrustEUColorFunc(country) {
+        let dis = getHighestCountryDistribution(country, "trust_eu", selectedElectionYear_SliderValue);
+        if (dis === -1) {
+            return "rgba(211, 211, 211, 1)";
+        }
+        return interpolateRedGreen(dis);
+    }
+
+    function countryHappyColorFunc(country) {
+        let dis = getHighestCountryDistribution(country, "happy", selectedElectionYear_SliderValue);
+        if (dis === -1) {
+            return "rgba(211, 211, 211, 1)";
+        }
+        return interpolateRedGreen(dis);
+    }
+
+    document.getElementById('mapRangeSlider').addEventListener('input', function() {
+        selectedElectionYear_SliderValue = this.value;
+        DrawMap();
+    });
 
     DrawMap();
 
     $('#dropdownMenuButton2').hide();
+
+    d3.select("#dropdownBigMap .dropdown-menu").selectAll('*').remove();
+
+    Object.keys(visualiseCategories).forEach(function(key) {
+        // Append a new dropdown item for each key
+        $('#dropdownBigMap .dropdown-menu').append(
+            `<a class="dropdown-item" href="#">${key}</a>`
+        );
+    });
+
+ 
+    $('#dropdownBigMap button').text(selectedVisualiseCategory);
+
+    $('#dropdownBigMap .dropdown-item').click(function() {
+        selectedVisualiseCategory = $(this).text();
+        console.log("test");
+        DrawMap();
+    });
+
 
     function changeMultiYear(toggle) {
         if (!toggle.checked) {
@@ -162,8 +244,7 @@
     }
 
     function countryColorFunc(country) {
-        let dis = getHighestCountryDistribution(country, "trust_country");
-        return interpolateRedGreen(dis);
+        return visualiseCategories[selectedVisualiseCategory](country)
     }
 
     function interpolateRedGreen(t) {
