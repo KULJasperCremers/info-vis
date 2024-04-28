@@ -13,10 +13,25 @@
 </head>
 <body>
 
-    <div id="map"></div>
     
+    <div id="maximized_screen" class="container mt-3" >
+        
+        <div class="row">
+            <div class="col">
+            <h1 class="text-center chart">Something</h1>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col">
+            <div id="map_big" class="chart"></div>
+            </div>
+        </div>
+    </div>
     
-    <div id="stuff" class="container mt-3">
+    <div id="map_small"></div>
+
+    
+    <div id="minimized_screen" class="container mt-3">
         <h1 id="country" class="text-center">Country Name</h1>
 
         <div class="row">
@@ -141,25 +156,27 @@
     }
 
     function DrawMap() {
-        d3.select('#map').selectAll('*').remove();
+        d3.select('#map_big').selectAll('*').remove();
+        d3.select('#map_small').selectAll('*').remove();
 
         if (!minimized) {
 
-            var w = window.innerWidth * 0.9;
+            var w = window.innerWidth * 0.8;
             var h = w / 2;
 
-            var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, w, h);
-            d3.select('#map').classed('minimized', false);
-            d3.select('#map').classed('maximized', true);
+            var svg = AppendMap('#map_big', OnHoverCountry, OnClickCountry, w, h);
+            d3.select('#map_big').classed('minimized', false);
+            d3.select('#map_big').classed('maximized', true);
 
-            document.getElementById('stuff').classList.add('hidden');
+            document.getElementById('minimized_screen').classList.add('hidden');
+            document.getElementById('maximized_screen').classList.remove('hidden');
 
             OnMaximized();
 
         } else {
-            var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, 280, 200);
-            d3.select('#map').classed('minimized', true);
-            d3.select('#map').classed('maximized', false);
+            var svg = AppendMap('#map_small', OnHoverCountry, OnClickCountry, 280, 200);
+            d3.select('#map_small').classed('minimized', true);
+            d3.select('#map_small').classed('maximized', false);
 
             svg.append("image")
                 .attr("xlink:href", "https://cdn.icon-icons.com/icons2/390/PNG/512/expand_38551.png") // Ensure the use of xlink:href for compatibility
@@ -171,7 +188,9 @@
                     SwitchMap();
                 });
 
-            document.getElementById('stuff').classList.remove('hidden');
+            document.getElementById('minimized_screen').classList.remove('hidden');
+            document.getElementById('maximized_screen').classList.add('hidden');
+
             
             OnMinimized();
         }
@@ -248,9 +267,6 @@
     }
 
     function OnMinimizedOneElectionSelected() {
-        // Circles
-        // First, select the div where you want to append the SVG
-
         clearMinimizedCharts();
 
         circles(cdata, "#row1col1");
@@ -261,7 +277,6 @@
     }
 
     function OnMinimizedTwoElectionSelected() {
-
         clearMinimizedCharts();
 
         satisfaction_trend(cdata, "#row1col1");

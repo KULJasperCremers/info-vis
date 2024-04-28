@@ -34,11 +34,6 @@ function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, width = 900, 
     // Request the GeoJSON
     d3.json("../json/ess_data3.json").then(function(cdata) {
         d3.json(geoJsonUrl).then(geojson => {
-            geojson.features = geojson.features.filter(function(d) {
-
-                return cdata.hasOwnProperty(countryCodes[d.properties.name]);
-            });
-    
             svg.selectAll("path")
             .data(geojson.features)
             .enter()
