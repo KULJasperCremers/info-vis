@@ -1,4 +1,4 @@
-function satisfaction_trend(cdata) {
+function satisfaction_trend(cdata, div_id) {
     // Satisfaction trend
     var countries = Object.keys(cdata);
     var years = mapYears(cdata,countries);
@@ -46,7 +46,7 @@ function satisfaction_trend(cdata) {
 
 
     // First, select the div where you want to append the SVG
-    const div4 = d3.select("#satisfaction");
+    const div4 = d3.select(div_id);
     div4.selectAll("svg").remove();
 
     var svgWidth = cellSize, svgHeight = cellSize;
@@ -54,7 +54,7 @@ function satisfaction_trend(cdata) {
     var width = svgWidth - margin.left - margin.right;
     var height = svgHeight - margin.top - margin.bottom;
 
-    var svg4 = d3.select('#satisfaction')
+    var svg4 = d3.select(div_id)
     .append('svg')
     .attr('width', svgWidth)
     .attr('height', svgHeight)
