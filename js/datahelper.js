@@ -116,18 +116,21 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
     for (year of surveyYears) {
         for (var i = 0; i < yearData[year].leaning.length; i++) {
             var leaning = yearData[year].leaning[i];
-            if (!surveyData[leaning]) {
-                surveyData[leaning] = {
+            if (!surveyData[year]) {
+                surveyData[year] = {};
+            }
+            if (!surveyData[year][leaning]) {
+                surveyData[year][leaning] = {
                     happy: [],
                     satisfaction: [],
                     trust_country: [],
                     trust_eu: []
                 };
             }
-            surveyData[leaning].happy.push(yearData[year].happy[i]);
-            surveyData[leaning].satisfaction.push(yearData[year].satisfaction[i]);
-            surveyData[leaning].trust_country.push(yearData[year].trust_country[i]);
-            surveyData[leaning].trust_eu.push(yearData[year].trust_eu[i]);
+            surveyData[year][leaning].happy.push(yearData[year].happy[i]);
+            surveyData[year][leaning].satisfaction.push(yearData[year].satisfaction[i]);
+            surveyData[year][leaning].trust_country.push(yearData[year].trust_country[i]);
+            surveyData[year][leaning].trust_eu.push(yearData[year].trust_eu[i]);
         }
     }
     
