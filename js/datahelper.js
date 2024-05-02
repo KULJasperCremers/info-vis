@@ -15,11 +15,23 @@ var countryCodes = {
     "Sweden": "SE",
 }
 
+var newCountryCodes = {
+    "Austria": "AT",
+    "Belgium": "BE",
+    "Germany": "DE",
+    "Denmark": "DK",
+    "Greece": "EL",
+    "Spain": "ES",
+    "Finland": "FI",
+    "France": "FR",
+    "Ireland": "IE",
+    "Italy": "IT",
+    "Netherlands": "NL",
+    "Portugal": "PT",
+    "Sweden": "SE", 
+}
+
 var leanings = ["far-left", "left", "center-left", "center", "center-right", "right", "far-right", "Other parties"];
-
-var leanings_ess = ["far-left", "far-left", "left", "left", "center-left", "center", "center-right", "right", "right", "far-right", "far-right"];
-var leanings_ess_indices = [0, 0, 1, 1, 2, 3, 4, 5, 5, 6, 6];
-
 
 var dataTypes = {
     "election": "election_data",
@@ -53,6 +65,52 @@ d3.json("../json/ess_data_all.json").then(function(data) {
 });
 
 */
+
+d3.json("../json/ess_data_all.json").then(function(data) {
+    console.log(aggregateDashboardDataForCountryBetweenYears(data, "Belgium", 2003, 2019));
+});
+
+function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year2) {
+    var countryData = data[newCountryCodes[country]];
+
+    var allYears = Object.keys(countryData[dataTypes.election]).map(Number);
+    var years = allYears.filter(year => year >= year1 && year <= year2);
+
+    var aggregatedElectionDataPerYearAndLeaning = {};
+    for (var year of years) {
+        var yearData = countryData[dataTypes.election][year];
+        var leaningTotals = {};
+        for (var party in yearData) {
+            for (var leaning in countryData[dataTypes.leaning]) {
+                if (countryData[dataTypes.leaning][leaning].includes(party)) {
+                    if (!leaningTotals[leaning]) {
+                        leaningTotals[leaning] = 0;
+                    }
+                    leaningTotals[leaning] += yearData[party];
+                }
+            }
+        }
+        aggregatedElectionDataPerYearAndLeaning[year] = leaningTotals;
+    }
+    console.log(aggregatedElectionDataPerYearAndLeaning)
+
+    var growthPercentages = {};
+    for (var i = 1; i < years.length; i++) {
+        var year = years[i];
+        var yearData = aggregatedElectionDataPerYearAndLeaning[year];
+        var previousYearData = aggregatedElectionDataPerYearAndLeaning[years[i - 1]];
+        for (var leaning in yearData) {
+            var intervalKey = `${years[i - 1]}-${year}`;
+            if (!growthPercentages[leaning]) {
+                growthPercentages[leaning] = {};
+            }
+            var growth = (yearData[leaning] - previousYearData[leaning]) / previousYearData[leaning];
+            growthPercentages[leaning][intervalKey] = growth;
+        }
+    }
+    
+    return growthPercentages;
+}
 
 // query the aggregated survey data for a specific country, year and column
 function querySurveyDataCountryYearColumn(surveyData,mapYears,country,year,column) {
