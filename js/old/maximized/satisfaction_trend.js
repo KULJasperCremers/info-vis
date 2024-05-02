@@ -1,12 +1,12 @@
-function happy_trend(cdata, div_id) {
+function satisfaction_trend(cdata, div_id) {
     // Satisfaction trend
     var countries = Object.keys(cdata);
     var years = mapYears(cdata,countries);
     var aggregatedsurveyData = aggregateSurveyData(cdata,years);
     // console.log(aggregatedsurveyData);
 
-    var hapinessDataFrom = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_From,"happy")["sum"];
-    var hapinessDataTo =  querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_To,"happy")["sum"];
+    var hapinessDataFrom = querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_From,"satisfaction")["sum"];
+    var hapinessDataTo =  querySurveyDataCountryYearColumn(aggregatedsurveyData,years,countryCodes[selectedCountry],selectedElectionYearIndex_To,"satisfaction")["sum"];
 
     var hapinessDataFrom = concatd(hapinessDataFrom);
     var hapinessDataTo = concatd(hapinessDataTo);
@@ -34,17 +34,12 @@ function happy_trend(cdata, div_id) {
                 new_data[index] += data[i];  // Add the value directly, assuming data[i] is numeric
             }
         }
-
-        console.log(new_data);
-
         return new_data;
     }
 
     var data = Object.keys(hapinessDataFrom).map(function(key) {
         return { party: leanings[key], value: ((hapinessDataTo[key] / totalTo) - (hapinessDataFrom[key] / totalFrom)) * 100 };
     });
-
-    console.log(data);
 
 
     // First, select the div where you want to append the SVG
@@ -113,5 +108,5 @@ function happy_trend(cdata, div_id) {
     .attr("y", 5) 
     .attr("text-anchor", "middle")
     .style("font-size", "1.5rem") 
-    .text("Happiness");
+    .text("Satisfaction");
 }

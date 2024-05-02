@@ -16,7 +16,6 @@ var countryCodes = {
 }
 
 function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, colorFunc = undefined, width = 900, height = 500) {
-
     let svg = d3.select(htmlId).append("svg")
     .attr("width", width)
     .attr("height", height)

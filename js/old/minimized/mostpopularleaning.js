@@ -9,8 +9,6 @@ function mostpopularleaning(cdata, div_id) {
             return { party: key, value: leaningData[key] };
         });
 
-        console.log(data)
-
         var svgWidth = cellSize, svgHeight = cellSize;
         var margin = { top: 20, right: 20, bottom: 70, left: 50 };
         var width = svgWidth - margin.left - margin.right;
