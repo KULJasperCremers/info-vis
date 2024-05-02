@@ -12,65 +12,90 @@
     <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
-    
-    <div class="row">
-        <div class="col chart">
+        <div class="row">
+            <div class="col chart" style="position: relative;">
+                <div  style="position: absolute; top: 0; right: 0; margin-right: 2rem; margin-top: 10rem;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-far-left" style="background-color:red;" onclick="selectLeaning('Far Left')">
+                        <label class="form-check-label" for="radio-far-left">
+                        <strong>Far left</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-left" style="background-color: aquamarine;" onclick="selectLeaning('Left')">
+                        <label class="form-check-label" for="radio-left">
+                            <strong>Left</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center-left" style="background-color: rgb(83, 153, 95);" onclick="selectLeaning('Center Left')">
+                        <label class="form-check-label" for="radio-center-left">
+                            <strong>Center Left</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center" style="background-color: blueviolet;" onclick="selectLeaning('Center')">
+                        <label class="form-check-label" for="radio-center">
+                            <strong>Center</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center-right" style="background-color:burlywood ;" onclick="selectLeaning('Center Right')">
+                        <label class="form-check-label" for="radio-center-right">
+                            <strong>Center Right</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-right" style="background-color:coral;" onclick="selectLeaning('Right')">
+                        <label class="form-check-label" for="radio-right">
+                            <strong>Right</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-far-right" checked style="background-color:blue;" onclick="selectLeaning('Far Right')">
+                        <label class="form-check-label" for="radio-far-right">
+                            <strong>Far Right</strong>
+                        </label>
+                    </div>
+                </div>
+                <div id="map"></div>
+            </div>
+            <div class="col">
+            <div class="row chart">
                 <h1 class="text-center">Map filters</h1>
                 <div class="row">
                     <div class="col">
-                        <p style="padding-left: 20px;">Date selection</p>
-                        <div class="dropdown" id="dropdownBigMap" style="padding-left: 10px;">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownBigMap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <p>From (Date)</p>
+                        <div class="dropdown" id="dropdownFrom" style="margin: 1rem;">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownFromButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Dropdown button
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonBigMap">
-                            
                             </div>
                         </div>
                     </div>
+    
                     <div class="col">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                            <label class="form-check-label" for="flexCheckDefault">
-                              Default checkbox
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                            <label class="form-check-label" for="flexCheckDefault">
-                              Default checkbox
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                            <label class="form-check-label" for="flexCheckDefault">
-                              Default checkbox
-                            </label>
-                          </div>
+                        <p>To (Date)</p>
+                        <div class="dropdown" id="dropdownTo" style="margin: 1rem;">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownToButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Dropdown button
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonBigMap">
+                                    
+                            </div>
+                        </div>
                     </div>
-                
+                    
+                </div>
             </div>
-
-                <label for="mapRangeSlider" class="form-label">Date</label>
-                <input type="range" class="form-range" id="mapRangeSlider" min="0" max="8">
+            <div class="row chart">
+                <h1 class="text-center" id="countryHeader">Country</h1>
+            </div>
+            </div>
         </div>
-
-        <div class="col chart">
-            <h1 class="text-center">Country details</h1>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col chart">
-            <div id="map"></div>
-        </div>
-        <div class="col chart">
-        </div>
-    </div>
-
-</body>
 
 <script src="datahelper.js"></script>
-
 <script src="map.js"></script>
 <script>
 
@@ -83,13 +108,19 @@
         countries = Object.keys(cdata);
         years = mapYears(cdata,countries);
         aggregatedsurveyData = aggregateSurveyData(cdata,years);
-
-        visualiseCategoriesParams['cdata'] = cdata;
     });
     
     var cellSize = 400;
     var selectedCountry = undefined; 
+    var selectedLeaning = "Far Right"
+
+    var selectedFromDate = undefined;
+    var selectedToDate = undefined;
     
+    function selectLeaning(leaning) {
+        selectedLeaning = leaning
+        console.log("click: " + leaning);
+    }
 
     function countryColorFunc(country) {
         return "white";
@@ -100,19 +131,73 @@
 
     function OnClickCountry(countryCode) {
         console.log("click: " + countryCode);
-        
-        selectedCountry = countryCode;
+        selectCountry(countryCode)
     }
 
     function drawMap() {
         d3.select('#map').selectAll('*').remove();
         var mapContainer = document.getElementById('map').parentNode;
         var w = mapContainer.clientWidth;
-        var h = w * 0.7;  
+        var h = w * 0.95;  
         var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, countryColorFunc, w, h);
+    }
+
+    function selectCountry(country) {
+        selectedCountry = country;
+        document.getElementById("countryHeader").innerText= country;
+
+        fillFromDatesDropdown("dropdownFrom", [2001,2002,2003], 0, 
+            function(text) {
+                selectedFromDate = text;
+            }
+        );
+        fillToDatesDropdown("dropdownTo", [2001,2002,2003], 0);
+    }
+
+    function fillFromDatesDropdown(id, dates, selectIndex) {
+        var $dropdown = $('#' + id);
+        var $dropdownMenu = $dropdown.find('.dropdown-menu');
+        var $dropdownButton = $dropdown.find('button.dropdown-toggle, a.dropdown-toggle');
+
+        $dropdownMenu.empty();
+
+        $.each(dates, function(index, year) {
+            $dropdownMenu.append(`<a class="dropdown-item" href="#" data-year="${year}">${year}</a>`);
+        });
+
+        $dropdownButton.text(dates[selectIndex]);
+
+        $dropdownMenu.on('click', '.dropdown-item', function(e) {
+            var selectedText = $(this).text();
+            $dropdownButton.text(selectedText); 
+            selectedFromDate = selectedText;
+        });
+    }
+
+    function fillToDatesDropdown(id, dates, selectIndex) {
+        var $dropdown = $('#' + id);
+        var $dropdownMenu = $dropdown.find('.dropdown-menu');
+        var $dropdownButton = $dropdown.find('button.dropdown-toggle, a.dropdown-toggle');
+
+        $dropdownMenu.empty();
+
+        $.each(dates, function(index, year) {
+            $dropdownMenu.append(`<a class="dropdown-item" href="#" data-year="${year}">${year}</a>`);
+        });
+
+        $dropdownButton.text(dates[selectIndex]);
+
+        $dropdownMenu.on('click', '.dropdown-item', function(e) {
+            var selectedText = $(this).text();
+            $dropdownButton.text(selectedText);
+            selectedToDate = selectedText;
+        });
     }
 
     drawMap();
 
 </script>
 
+</body>
+
+</html>
