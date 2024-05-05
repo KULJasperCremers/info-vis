@@ -9,7 +9,6 @@ var countryCodes = {
     "France": "FR",
     "Ireland": "IE",
     "Italy": "IT",
-    "Luxembourg": "LU",
     "Netherlands": "NL",
     "Portugal": "PT",
     "Sweden": "SE",

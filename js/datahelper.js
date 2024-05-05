@@ -66,9 +66,9 @@ d3.json("../json/ess_data_all.json").then(function(data) {
 
 */
 
-d3.json("../json/ess_data_all.json").then(function(data) {
-    console.log(aggregateDashboardDataForCountryBetweenYears(data, "Belgium", 2003, 2019));
-});
+// d3.json("../json/ess_data_all.json").then(function(data) {
+//     console.log(aggregateDashboardDataForCountryBetweenYears(data, "Belgium", 2003, 2019));
+// });
 
 function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year2) {
     var countryData = data[newCountryCodes[country]];
@@ -87,24 +87,52 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
                         leaningTotals[leaning] = 0;
                     }
                     leaningTotals[leaning] += yearData[party];
+                    if (leaning === 'center') {
+                        //console.log('Center party data:', party, yearData[party]);
+                    }
                 }
             }
         }
         aggregatedElectionDataPerYearAndLeaning[year] = leaningTotals;
     }
 
-    var growthPercentages = {};
+    //console.log(aggregatedElectionDataPerYearAndLeaning)
+
+    var minGrowth = Infinity;
+    var maxGrowth = -Infinity;
+    
+    // First pass to find min and max growth
     for (var i = 1; i < electionYears.length; i++) {
         var year = electionYears[i];
         var yearData = aggregatedElectionDataPerYearAndLeaning[year];
         var previousYearData = aggregatedElectionDataPerYearAndLeaning[electionYears[i - 1]];
         for (var leaning in yearData) {
-            var intervalKey = `${electionYears[i - 1]}-${year}`;
-            if (!growthPercentages[leaning]) {
-                growthPercentages[leaning] = {};
+            var growth = (yearData[leaning] - previousYearData[leaning]);
+            minGrowth = Math.min(minGrowth, growth);
+            maxGrowth = Math.max(maxGrowth, growth);
+        }
+    }
+    
+    // Second pass to calculate normalized growth and relative growth
+    var electionGrowth = {};
+    for (var i = 1; i < electionYears.length; i++) {
+        var year = electionYears[i];
+        var yearData = aggregatedElectionDataPerYearAndLeaning[year];
+        var previousYearData = aggregatedElectionDataPerYearAndLeaning[electionYears[i - 1]];
+        for (var leaning in yearData) {
+            var growth = (yearData[leaning] - previousYearData[leaning]);
+            var normalizedGrowth = 2 * ((growth - minGrowth) / (maxGrowth - minGrowth)) - 1; // Min-Max normalization
+            var relativeGrowth = ((yearData[leaning] - previousYearData[leaning]) / previousYearData[leaning]) * 100;
+            if (!electionGrowth[year]) {
+                electionGrowth[year] = {};
             }
-            var growth = (yearData[leaning] - previousYearData[leaning]) / previousYearData[leaning];
-            growthPercentages[leaning][intervalKey] = growth;
+            if (!electionGrowth[year][leaning]) {
+                electionGrowth[year][leaning] = {};
+            }
+            electionGrowth[year][leaning] = {
+                absolute: normalizedGrowth,
+                relative: relativeGrowth
+            };
         }
     }
 
@@ -113,6 +141,15 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
     
     var surveyData = {};
     var yearData = countryData[dataTypes.survey];
+
+    // Initialize surveyData for each year before the loop
+    for (year of surveyYears) {
+        surveyData[year] = {};
+    }
+
+    var prevYearMeans = { happy: 0, satisfaction: 0, trust_country: 0, trust_eu: 0 };
+    var surveyGrowth = {};
+    
     for (year of surveyYears) {
         for (var i = 0; i < yearData[year].leaning.length; i++) {
             var leaning = yearData[year].leaning[i];
@@ -131,12 +168,40 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
             surveyData[year][leaning].satisfaction.push(yearData[year].satisfaction[i]);
             surveyData[year][leaning].trust_country.push(yearData[year].trust_country[i]);
             surveyData[year][leaning].trust_eu.push(yearData[year].trust_eu[i]);
+    
+            // Calculate mean and growth for each category
+            for (var column in surveyData[year][leaning]) {
+                var values = surveyData[year][leaning][column];
+                var mean = values.reduce((a, b) => a + b, 0) / values.length;
+    
+                // Calculate growth from the second year onwards
+                if (prevYearMeans[column] !== 0) {
+                    var growth = mean - prevYearMeans[column];
+                    var relativeGrowth = ((mean - prevYearMeans[column]) / prevYearMeans[column]) * 100;
+                    if (!surveyGrowth[year]) {
+                        surveyGrowth[year] = {};
+                    }
+                    if (!surveyGrowth[year][leaning]) {
+                        surveyGrowth[year][leaning] = {};
+                    }
+                    if (!surveyGrowth[year][leaning][column]) {
+                        surveyGrowth[year][leaning][column] = {};
+                    }
+                    surveyGrowth[year][leaning][column] = {
+                        absolute: growth,
+                        relative: relativeGrowth
+                    };
+                }
+    
+                prevYearMeans[column] = mean;
+            }
         }
     }
-    
+
     return {
-        growthPercentages: growthPercentages,
-        surveyData: surveyData
+        electionGrowth: electionGrowth,
+        surveyGrowth: surveyGrowth,
+        percentagesLeaning: aggregatedElectionDataPerYearAndLeaning
     };
 }
 

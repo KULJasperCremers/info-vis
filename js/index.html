@@ -15,6 +15,7 @@
         <div class="row">
             <div class="col chart" style="margin-right: -37;">
                 <h1 class="text-center" id="countryHeader">Country</h1>
+                <div id="graph"></div>
             </div>
             <div class="col-1 chart" style="margin-right: -50;">
                 <div  style="margin-top: 200%;">
@@ -114,6 +115,8 @@
         countries = Object.keys(cdata);
         years = mapYears(cdata,countries);
         aggregatedsurveyData = aggregateSurveyData(cdata,years);
+
+        graph(cdata, "Belgium", 2003, 2019);
     });
     
     var cellSize = 400;
@@ -122,14 +125,61 @@
 
     var selectedFromDate = undefined;
     var selectedToDate = undefined;
+
+
     
     function selectLeaning(leaning) {
         selectedLeaning = leaning
+        drawMap(countryColorFuncGrowth);
         console.log("click: " + leaning);
+    }
+
+    var leaning_mapper = {
+        "Center": "center",
+        "Center Left": "center-left",
+        "Center Right": "center-right",
+        "Far Right": "far-right",
+        "Left": "left",
+        "Far Left": "far-left",
+        "Right": "right"
     }
 
     function countryColorFunc(country) {
         return "white";
+    }
+
+
+    function countryColorFuncGrowth(country) {
+        // anbs growth
+        console.log(country + " from: " + selectedFromDate + ", to: " + selectedToDate)
+
+        if (selectedToDate === undefined || selectedFromDate === undefined) {
+            return "white";
+        }
+
+        let data = aggregateDashboardDataForCountryBetweenYears(cdata, country, selectedFromDate, selectedToDate)["percentagesLeaning"];
+        
+        leaning = leaning_mapper[selectedLeaning]
+        if (country === "Germany") {
+                console.log(data)
+            }
+
+        first = data[Object.keys(data)[0]]
+        last = data[Object.keys(data).at(-1)]
+
+        if (first[leaning] && last[leaning]) {
+            var growth = ((last[leaning] - first[leaning]) + 100) / 200;
+            if (country === "Germany") {
+                console.log(data[Object.keys(data)[0]][leaning])
+                console.log(data[Object.keys(data).at(-1)][leaning])
+                console.log(data)
+                console.log(growth)
+            }
+            return interpolateRedGreen(growth)
+        }
+        else {
+            return "white";
+        }
     }
 
     function OnHoverCountry(countryCode) {
@@ -140,12 +190,12 @@
         selectCountry(countryCode)
     }
 
-    function drawMap() {
+    function drawMap(colorFunc) {
         d3.select('#map').selectAll('*').remove();
         var mapContainer = document.getElementById('map').parentNode;
         var w = mapContainer.clientWidth;
         var h = w * 1;  
-        var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, countryColorFunc, w, h);
+        var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, colorFunc, w, h);
     }
 
     function selectCountry(country) {
@@ -154,6 +204,8 @@
 
         var countryData = cdata[newCountryCodes[country]];
         var allElectionYears = Object.keys(countryData[dataTypes.election]).map(Number)
+
+        selectedFromDate = allElectionYears[0]
 
         fillFromDatesDropdown("dropdownFrom", allElectionYears, 0, 
             function(text) {
@@ -180,6 +232,8 @@
             var selectedText = $(this).text();
             $dropdownButton.text(selectedText); 
             selectedFromDate = selectedText;
+
+            drawMap(countryColorFuncGrowth);
         });
     }
 
@@ -200,10 +254,105 @@
             var selectedText = $(this).text();
             $dropdownButton.text(selectedText);
             selectedToDate = selectedText;
+
+            drawMap(countryColorFuncGrowth);
         });
     }
 
-    drawMap();
+    drawMap(countryColorFunc);
+
+    function graph() {
+        let growthData = aggregateDashboardDataForCountryBetweenYears(cdata, "Belgium", 2003, 2019);
+        let years = Object.keys(growthData.electionGrowth).map(Number);
+        let politicalLeanings = ["far-left", "left", "center-left", "center", "center-right", "right", "far-right"];
+
+        console.log(growthData)
+
+        // Get the graphContainer
+        var graphContainer = document.getElementById('graph').parentNode;
+
+        // Get the width and height of the graphContainer
+        var width = graphContainer.clientWidth;
+        var height = graphContainer.clientHeight;
+
+        // Create an SVG in the graphContainer
+        var svg = d3.select(graphContainer)
+        .append("svg")
+            .attr("width", width - 25)
+            .attr("height", height / 2);
+
+        // Define the scales
+        let xScale = d3.scaleBand().domain(years).range([0, width]);
+        let colorScale = d3.scaleOrdinal().domain(politicalLeanings).range(colors);
+        let yScaleLeft = d3.scaleLinear().domain([-1, 1]).range([height, 0]);
+        let yScaleRight = d3.scaleLinear().domain([-50, 160]).range([height, 0]);
+
+        // Define the line generator
+        let line = d3.line()
+            .x((d) => xScale(d.year))
+            .y((d) => yScaleLeft(d.absoluteGrowth));
+
+            console.log(graphContainer.clientWidth, graphContainer.clientHeight);
+
+        // Loop over the years
+        for (let year of years) {
+            // Loop over the political leanings
+            for (let leaning of politicalLeanings) {
+                // Get the growth data for this year and leaning
+                let growth = growthData.electionGrowth[year][leaning];
+
+                // Check if growth is defined
+                if (growth) {
+                    // Generate a line for the absolute growth
+                    svg.append("path")
+                        .datum(growth)
+                        .attr("fill", "none")
+                        .attr("stroke", colorScale(leaning))
+                        .attr("d", line);
+
+                    // Generate a bar for the relative growth
+                    svg.append("rect")
+                        .attr("class", "bar")
+                        .attr("x", xScale(year))
+                        .attr("y", yScaleRight(growth.relativeGrowth))
+                        .attr("width", xScale.bandwidth())
+                        .attr("height", height - yScaleRight(growth.relativeGrowth))
+                        .attr("fill", colorScale(leaning));
+                }
+            }
+        }
+
+        // Add axes and labels
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale));
+
+        svg.append("g")
+            .call(d3.axisLeft(yScaleLeft));
+
+        svg.append("g")
+            .attr("transform", "translate(" + width + ",0)")
+            .call(d3.axisRight(yScaleRight));
+
+                
+    }
+
+    function interpolateRedGreen(t) {
+        if (t < 0 || t > 1) {
+            return 'Value must be between 0 and 1';
+        }
+
+        // Calculate red and green components
+        const red = 255 * (1 - t);
+        const green = 255 * t;
+
+        // Convert each component to an integer
+        const r = Math.round(red);
+        const g = Math.round(green);
+
+        // Return the color in hexadecimal format
+        return `rgb(${r}, ${g}, 0)`;
+    }
 
 </script>
 
