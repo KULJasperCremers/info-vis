@@ -88,7 +88,7 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
                     }
                     leaningTotals[leaning] += yearData[party];
                     if (leaning === 'center') {
-                        //console.log('Center party data:', party, yearData[party]);
+                        console.log('Center party data:', party, yearData[party]);
                     }
                 }
             }
@@ -96,7 +96,7 @@ function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year
         aggregatedElectionDataPerYearAndLeaning[year] = leaningTotals;
     }
 
-    //console.log(aggregatedElectionDataPerYearAndLeaning)
+    console.log(aggregatedElectionDataPerYearAndLeaning)
 
     var minGrowth = Infinity;
     var maxGrowth = -Infinity;

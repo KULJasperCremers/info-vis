@@ -20,8 +20,8 @@ function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, colorFunc = u
     .attr("height", height)
 
     let europeProjection = d3.geoMercator()
-    .center([ 8, 52 ])
-    .scale([ width / 1.5 * 1.7 ])
+    .center([ 13, 52 ])
+    .scale([ width ])
     .translate([ width / 2, height / 2 ])
 
 
