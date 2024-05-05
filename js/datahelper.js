@@ -69,6 +69,9 @@ d3.json("../json/ess_data_all.json").then(function(data) {
 // d3.json("../json/ess_data_all.json").then(function(data) {
 //     console.log(aggregateDashboardDataForCountryBetweenYears(data, "Belgium", 2003, 2019));
 // });
+// d3.json("../json/ess_data_all.json").then(function(data) {
+//     console.log(aggregateDashboardDataForCountryBetweenYears(data, "Belgium", 2003, 2019));
+// });
 
 function aggregateDashboardDataForCountryBetweenYears(data, country, year1, year2) {
     var countryData = data[newCountryCodes[country]];

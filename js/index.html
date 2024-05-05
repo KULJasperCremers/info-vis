@@ -354,6 +354,91 @@
         return `rgb(${r}, ${g}, 0)`;
     }
 
+    function graph() {
+        let ddata = aggregateDashboardDataForCountryBetweenYears(cdata, "Belgium", 2003, 2019);
+
+        console.log(ddata)
+
+        var growthData = [];
+        var allYears = [];
+        for (var leaning in ddata.growthPercentages) {
+            for (var interval in ddata.growthPercentages[leaning]) {
+                var years = interval.split('-').map(Number);
+                var endYear = new Date(years[1], 0).getFullYear();
+                
+                if (!allYears.includes(endYear)) {
+                    allYears.push(endYear);
+                }
+                growthData.push({
+                    leaning: leaning,
+                    interval: endYear,
+                    growth: ddata.growthPercentages[leaning][interval]
+                });
+            }
+        }
+
+        console.log(growthData)
+
+        // Get the graphContainer
+        var graphContainer = document.getElementById('graph').parentNode;
+
+        // Get the width and height of the graphContainer
+        var width = graphContainer.clientWidth;
+        var height = graphContainer.clientHeight;
+
+        // Create an SVG in the graphContainer
+        var svg = d3.select(graphContainer)
+        .append("svg")
+            .attr("width", width - 25)
+            .attr("height", height / 2);
+
+        // Define margins for the x-axis
+        var xAxisMargin = 50;
+
+        // Create a scale for your x-axis
+        var x = d3.scalePoint()
+        .domain(allYears) 
+        .range([xAxisMargin, width - 25 - xAxisMargin]); // Leave space on both sides of the x-axis
+
+        // Create a scale for your y-axis
+        var y = d3.scaleLinear()
+        .domain([-1, 1]) 
+        .range([height / 2 - 20, 25]); 
+
+        // Add the y-axis to your SVG
+        svg.append("g")
+        .attr("transform", "translate(" + xAxisMargin + ",0)")
+        .call(d3.axisLeft(y).ticks(5));
+
+        // Add the x-axis to your SVG
+        svg.append("g")
+        .attr("transform", "translate(0," + y(0) + ")")
+        .call(d3.axisBottom(x));
+
+        // Define color scale
+        var color = d3.scaleOrdinal()
+        .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
+        .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
+
+        // Define your line
+        var line = d3.line()
+        .x(function(d) { return x(d.interval); }) 
+        .y(function(d) { return y(d.growth); });
+
+        // Group the data by leaning
+        var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
+
+        // Append your lines to the SVG
+        dataByLeaning.forEach(function([key, values]) {
+            svg.append("path")
+            .datum(values)
+            .attr("fill", "none")
+            .attr("stroke", color(key))
+            .attr("stroke-width", 1.5)
+            .attr("d", line);
+        });
+
+    }
 </script>
 
 </body>
