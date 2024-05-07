@@ -106,17 +106,12 @@
 <script src="map.js"></script>
 <script>
 
-    let cdata;
-    let aggregatedsurveyData;
-    let years;
-    let countries;
+    let data;
+    //d3.json("../json/allCountryData.json").then(function(d) {
     d3.json("../json/ess_data_all.json").then(function(d) {
-        cdata = d;
-        countries = Object.keys(cdata);
-        years = mapYears(cdata,countries);
-        aggregatedsurveyData = aggregateSurveyData(cdata,years);
-
-        graph(cdata, "Belgium", 2003, 2019);
+        data = aggregateDashboardDataForAllCountries(d);
+        console.log(data)
+        // console.log(d)
     });
     
     var cellSize = 400;
@@ -130,8 +125,7 @@
     
     function selectLeaning(leaning) {
         selectedLeaning = leaning
-        drawMap(countryColorFuncGrowth);
-        console.log("click: " + leaning);
+        // drawMap(countryColorFuncGrowth);
     }
 
     var leaning_mapper = {
@@ -150,7 +144,7 @@
 
 
     function countryColorFuncGrowth(country) {
-        // anbs growth
+        // abs growth
         console.log(country + " from: " + selectedFromDate + ", to: " + selectedToDate)
 
         if (selectedToDate === undefined || selectedFromDate === undefined) {
@@ -160,21 +154,13 @@
         let data = aggregateDashboardDataForCountryBetweenYears(cdata, country, selectedFromDate, selectedToDate)["percentagesLeaning"];
         
         leaning = leaning_mapper[selectedLeaning]
-        if (country === "Germany") {
-                console.log(data)
-            }
 
         first = data[Object.keys(data)[0]]
         last = data[Object.keys(data).at(-1)]
 
         if (first[leaning] && last[leaning]) {
             var growth = ((last[leaning] - first[leaning]) + 100) / 200;
-            if (country === "Germany") {
-                console.log(data[Object.keys(data)[0]][leaning])
-                console.log(data[Object.keys(data).at(-1)][leaning])
-                console.log(data)
-                console.log(growth)
-            }
+
             return interpolateRedGreen(growth)
         }
         else {
