@@ -52,7 +52,7 @@ function aggregateDashboardDataForAllCountries(data) {
     }
 
     // Create a blob from the JSON string
-    var blob = new Blob([JSON.stringify(allCountryData, null, 2)], {type: "application/json"});
+   /* var blob = new Blob([JSON.stringify(allCountryData, null, 2)], {type: "application/json"});
     // Create a URL for the blob
     var url = URL.createObjectURL(blob);
 
@@ -61,7 +61,7 @@ function aggregateDashboardDataForAllCountries(data) {
     link.href = url;
     link.download = 'allCountryData.json';
     link.click();
-
+*/
     return allCountryData;
 }
 
@@ -91,7 +91,7 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
         aggregatedElectionDataPerYearAndLeaning[year] = leaningTotals;
     }
 
-    console.log(aggregatedElectionDataPerYearAndLeaning)
+    //console.log(aggregatedElectionDataPerYearAndLeaning)
 
     // Second pass to calculate normalized growth and relative growth
     var electionGrowth = {};
@@ -187,4 +187,22 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
         surveyGrowth: surveyGrowth,
         percentagesLeaning: aggregatedElectionDataPerYearAndLeaning
     };
+}
+
+function get_percentage_leaning_data_between(data, country, from, to) {
+
+    var countryData = data[country]["percentagesLeaning"];
+
+    var newData = Object.keys(countryData)
+        .filter(key => parseInt(key) >= from && parseInt(key) <= to)
+        .reduce((obj, key) => {
+            obj[key] = countryData[key];
+            return obj;
+        }, {});
+
+    return newData;
+}
+
+function get_all_dates(data, country) {
+    return Object.keys(data[country]["percentagesLeaning"]);
 }

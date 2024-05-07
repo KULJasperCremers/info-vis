@@ -21,43 +21,43 @@
                 <div  style="margin-top: 200%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-far-left" style="background-color:red;" onclick="selectLeaning('Far Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color:red;" onclick="selectLeaning('Far Left')" checked>
                         <label class="form-check-label" for="radio-far-left">
                         <strong>Far left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-left" style="background-color: aquamarine;" onclick="selectLeaning('Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-left" style="background-color: aquamarine;" onclick="selectLeaning('Left')">
                         <label class="form-check-label" for="radio-left">
                             <strong>Left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center-left" style="background-color: rgb(83, 153, 95);" onclick="selectLeaning('Center Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-left" style="background-color: rgb(83, 153, 95);" onclick="selectLeaning('Center Left')">
                         <label class="form-check-label" for="radio-center-left">
                             <strong>Center Left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center" style="background-color: blueviolet;" onclick="selectLeaning('Center')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center" style="background-color: blueviolet;" onclick="selectLeaning('Center')">
                         <label class="form-check-label" for="radio-center">
                             <strong>Center</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-center-right" style="background-color:burlywood ;" onclick="selectLeaning('Center Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:burlywood ;" onclick="selectLeaning('Center Right')">
                         <label class="form-check-label" for="radio-center-right">
                             <strong>Center Right</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-right" style="background-color:coral;" onclick="selectLeaning('Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-right" style="background-color:coral;" onclick="selectLeaning('Right')">
                         <label class="form-check-label" for="radio-right">
                             <strong>Right</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-far-right" checked style="background-color:blue;" onclick="selectLeaning('Far Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-right" checked style="background-color:blue;" onclick="selectLeaning('Far Right')">
                         <label class="form-check-label" for="radio-far-right">
                             <strong>Far Right</strong>
                         </label>
@@ -107,10 +107,21 @@
 <script>
 
     let data;
+    let all_dates = [];
     //d3.json("../json/allCountryData.json").then(function(d) {
-    d3.json("../json/ess_data_all.json").then(function(d) {
-        data = aggregateDashboardDataForAllCountries(d);
+    d3.json("../json/allCountryData.json").then(function(d) {
+        data = d;
         console.log(data)
+        
+        Object.values(newCountryCodes).forEach(element => {
+            var dates = get_all_dates(data, element);
+            all_dates.push(...dates); 
+        });
+
+        all_dates = [...new Set(all_dates)];
+        all_dates.sort((a, b) => a - b);
+
+        selectCountry("Belgium");
         // console.log(d)
     });
     
@@ -121,11 +132,19 @@
     var selectedFromDate = undefined;
     var selectedToDate = undefined;
 
-
+    var selectedLeanings = [];
     
     function selectLeaning(leaning) {
-        selectedLeaning = leaning
-        // drawMap(countryColorFuncGrowth);
+        const index = selectedLeanings.indexOf(leaning);
+
+        if (index > -1) {
+            // If the leaning is already in the array, remove it
+            selectedLeanings.splice(index, 1);
+        } else {
+            // Otherwise, add the leaning to the array
+            selectedLeanings.push(leaning);
+        }
+        drawMap(countryColorFuncGrowth);
     }
 
     var leaning_mapper = {
@@ -151,21 +170,45 @@
             return "white";
         }
 
-        let data = aggregateDashboardDataForCountryBetweenYears(cdata, country, selectedFromDate, selectedToDate)["percentagesLeaning"];
-        
-        leaning = leaning_mapper[selectedLeaning]
+        var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
+        var dates = Object.keys(leaning_data);
 
-        first = data[Object.keys(data)[0]]
-        last = data[Object.keys(data).at(-1)]
+        //leaning = leaning_mapper[selectedLeaning]
+        first = leaning_data[dates[0]]
+        last = leaning_data[dates.at(-1)]
 
-        if (first[leaning] && last[leaning]) {
-            var growth = ((last[leaning] - first[leaning]) + 100) / 200;
+        var aggregateFirst = 0;
+        var aggregateLast = 0;
 
-            return interpolateRedGreen(growth)
+        selectedLeanings.forEach(l => {
+            var leaning = l;
+            var mapped_leaning = leaning_mapper[l];
+
+            if (country == "Netherlands") {
+                console.log("TTT: " + first[mapped_leaning]);
+                console.log("TT21T: " + last[mapped_leaning]);
+                console.log(mapped_leaning);
+            }
+            if (
+                first != undefined && last !== undefined && 
+                first[mapped_leaning] && last[mapped_leaning]
+            ) {
+                aggregateFirst += first[mapped_leaning];
+                aggregateLast += last[mapped_leaning];
+            }
+        });
+
+        if (country == "Netherlands") {
+            console.log(selectedLeanings);
+            console.log(first);
+            console.log(aggregateFirst);
+            console.log(last);
+            console.log(aggregateLast);
         }
-        else {
-            return "white";
-        }
+
+        var growth = (aggregateLast - aggregateFirst)
+        var normalized_growth = (growth + 100) / 200;
+        return [growth, interpolateRedGreen(normalized_growth)]
     }
 
     function OnHoverCountry(countryCode) {
@@ -188,17 +231,17 @@
         selectedCountry = country;
         document.getElementById("countryHeader").innerText= country;
 
-        var countryData = cdata[newCountryCodes[country]];
-        var allElectionYears = Object.keys(countryData[dataTypes.election]).map(Number)
+        //var dates = get_all_dates(data, newCountryCodes[country]);
 
-        selectedFromDate = allElectionYears[0]
+        var dates = all_dates;
 
-        fillFromDatesDropdown("dropdownFrom", allElectionYears, 0, 
-            function(text) {
-                selectedFromDate = text;
-            }
-        );
-        fillToDatesDropdown("dropdownTo", allElectionYears, 0);
+        selectedFromDate = dates.at(-2);
+        selectedToDate = dates.at(-1);
+
+        fillFromDatesDropdown("dropdownFrom", dates, dates.length - 2);
+        fillToDatesDropdown("dropdownTo", dates, dates.length - 1);
+
+        drawMap(countryColorFuncGrowth);
     }
 
     function fillFromDatesDropdown(id, dates, selectIndex) {
@@ -430,3 +473,4 @@
 </body>
 
 </html>
+
