@@ -413,12 +413,14 @@
                     growthData.push({
                         leaning: leaning,
                         year: year,
-                        growth: growth.absolute
+                        growth: growth.cumulative
                     });
                     allYears.push(year);
                 }
             }
         }
+
+        // console.log(growthData)
 
         // Find the min and max growth values
         var growthMin = d3.min(growthData, function(d) { return d.growth; });
@@ -530,7 +532,7 @@
         .attr("dy", y(0) - 15); // Adjust the 15 to move the labels up or down
 
     }
-
+   
     function graphSurvey(country, date1, date2, svg) {
         var newCountryCodes = {
             "Austria": "AT",
@@ -551,14 +553,14 @@
         var growthData = [];
         var allYears = [];
         for (var year in data[newCountryCodes[country]].surveyGrowth) {
-            if (year >= date1 && year <= date2) {
+            if (year => date1 && year <= date2) {
                 for (var leaning in data[newCountryCodes[country]].surveyGrowth[year]) {
                     var growth = data[newCountryCodes[country]].surveyGrowth[year][leaning];
                     //console.log(data[newCountryCodes[country]].surveyGrowth[year][leaning])
                     growthData.push({
                         leaning: leaning,
                         year: year,
-                        growth: growth.satisfaction.absolute
+                        growth: growth.satisfaction.cumulative
                         /**growth: {
                             "happy": growth.happy,
                             "satisfaction": growth.satisfaction,
@@ -570,26 +572,8 @@
                 }
             }
         }
+        console.log(growthData)
 
-        /**
-        var maxGrowth = { happy: -Infinity, satisfaction: -Infinity, trust_country: -Infinity, trust_eu: -Infinity };
-        var minGrowth = { happy: Infinity, satisfaction: Infinity, trust_country: Infinity, trust_eu: Infinity };
-        
-        for (var item of growthData) {
-            for (var category in item.growth) {
-                var absoluteGrowth = item.growth[category].absolute;
-                if (absoluteGrowth > maxGrowth[category]) {
-                    maxGrowth[category] = absoluteGrowth;
-                }
-                if (absoluteGrowth < minGrowth[category]) {
-                    minGrowth[category] = absoluteGrowth;
-                }
-            }
-        }
-        
-        console.log('Max growth:', maxGrowth);
-        console.log('Min growth:', minGrowth);
-        **/
         // Find the min and max growth values
         var growthMin = d3.min(growthData, function(d) { return d.growth; });
         var growthMax = d3.max(growthData, function(d) { return d.growth; });
@@ -597,7 +581,7 @@
         // Create a scale for your growth data
         var growthScale = d3.scaleLinear()
             .domain([growthMin, growthMax])
-            .range([growthMin, growthMax]);
+            .range([-1, 1]);
 
         // Get the parent container
         var graphContainer = document.getElementById('graph').parentNode;
@@ -626,7 +610,7 @@
 
         // Create a scale for your y-axis
         var y = d3.scaleLinear()
-        .domain([growthMin, growthMax]) 
+        .domain([-1, 1]) 
         .range([height / 2 - 20, 25]); 
 
         // Add the y-axis to your SVG
@@ -660,18 +644,9 @@
         // Group the data by leaning
         var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
 
-        /**
         // Scale the growth data in dataByLeaning
         dataByLeaning = dataByLeaning.map(([key, values]) => {
             return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
-        });
-        **/
-        dataByLeaning = dataByLeaning.map(([key, values]) => {
-            let cumulativeGrowth = 0;
-            return [key, values.map(d => {
-                cumulativeGrowth += d.growth;
-                return {...d, growth: cumulativeGrowth};
-            })];
         });
 
         // Filter the data to include only the selected leanings
@@ -687,6 +662,7 @@
             return false;
         });
 
+        //console.log(filteredDataByLeaning)
 
         // Append your lines to the SVG
         filteredDataByLeaning.forEach(function([key, values]) {
@@ -706,7 +682,6 @@
         // Move the x-axis labels to the bottom of the grid lines
         xAxis.selectAll("text")
         .attr("dy", y(0) - 15); // Adjust the 15 to move the labels up or down
-
     }
 
   
