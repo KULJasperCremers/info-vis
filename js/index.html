@@ -22,7 +22,7 @@
                 <div id="graph"></div>
             </div>
             <div class="col-1 chart" style="margin-right: -50;">
-                <div  style="margin-top: 200%;">
+                <div  style="margin-top: 120%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color: #a6cee3;" onclick="selectLeaning(this, 'Far Left')">
@@ -67,10 +67,32 @@
                         </label>
                     </div>
                 </div>
+                <div  style="margin-top: 30%;">
+                    <p><strong>Survey</strong></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-survey" id="radio-happy" style="background-color:#FFCC0D;" onclick="selectSurvey(this, 'happy')" checked>
+                        <label class="form-check-label" for="radio-happy">
+                        <strong>Happiness</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-survey" id="radio-satisfaction" style="background-color:#00796B;" onclick="selectSurvey(this, 'satisfaction')">
+                        <label class="form-check-label" for="radio-satisfaction">
+                            <strong>Satisfaction</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-survey" id="radio-trust-country" style="background-color:#BF2669;" onclick="selectSurvey(this, 'trust_country')">
+                        <label class="form-check-label" for="radio-trust-country">
+                            <strong>Trust Country</strong>
+                        </label>
+                    </div>
+                   
+                </div>
             </div>
             <div class="col">
             <div class="row chart">
-                <h1 class="text-center">Map filters</h1>
+                <h1 class="text-center">Date Selection</h1>
                 <div class="row">
                     <p>Between <span id="slider-value-lower"></span> and <span id="slider-value-upper"></span></p>
                     <div id="slider" style="margin-bottom: 1rem; margin-left: 1rem; margin-right: 1rem;"></div>
@@ -120,6 +142,8 @@
     var selectedFromDate = undefined;
     var selectedToDate = undefined;
 
+    var selectedSurveyType = "happy";
+
     var selectedLeanings = [];
 
     function selectLeaning(checkbox, leaning) {
@@ -159,7 +183,7 @@
         graph(selectedCountry, selectedFromDate, selectedToDate, svg);
     
         // Draw the second graph
-        graphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg);
+        graphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg, selectedSurveyType);
     }
 
     var leaning_mapper = {
@@ -533,7 +557,23 @@
 
     }
    
-    function graphSurvey(country, date1, date2, svg) {
+
+
+    function selectSurvey(radio, type) {
+        if (radio.checked) {
+            selectedSurveyType = type;
+
+            var graphContainer = document.getElementById('graph').parentNode;
+            
+            // Remove all child elements of the graphContainer
+            graphContainer.removeChild(graphContainer.lastChild);
+
+            graphSurvey(selectedCountry, selectedFromDate, selectedToDate, graphContainer, type);
+        }
+    }
+
+
+    function graphSurvey(country, date1, date2, svg, type) {
         var newCountryCodes = {
             "Austria": "AT",
             "Belgium": "BE",
@@ -550,6 +590,8 @@
             "Sweden": "SE", 
         }
 
+        console.log(type);
+
         var growthData = [];
         var allYears = [];
         for (var year in data[newCountryCodes[country]].surveyGrowth) {
@@ -557,17 +599,48 @@
                 for (var leaning in data[newCountryCodes[country]].surveyGrowth[year]) {
                     var growth = data[newCountryCodes[country]].surveyGrowth[year][leaning];
                     //console.log(data[newCountryCodes[country]].surveyGrowth[year][leaning])
-                    growthData.push({
-                        leaning: leaning,
-                        year: year,
-                        growth: growth.satisfaction.cumulative
-                        /**growth: {
-                            "happy": growth.happy,
-                            "satisfaction": growth.satisfaction,
-                            "trust_country": growth.trust_country,
-                            "trust_eu": growth.trust_eu
-                        }**/
-                    });
+
+                    if (type === "happy") {
+                        growthData.push({
+                            leaning: leaning,
+                            year: year,
+                            growth: growth.happy.cumulative
+                            /**growth: {
+                                "happy": growth.happy,
+                                "satisfaction": growth.satisfaction,
+                                "trust_country": growth.trust_country,
+                                "trust_eu": growth.trust_eu
+                            }**/
+                        });
+                    }
+                    else if (type === "satisfaction") {
+                        growthData.push({
+                            leaning: leaning,
+                            year: year,
+                            growth: growth.satisfaction.cumulative
+                            /**growth: {
+                                "happy": growth.happy,
+                                "satisfaction": growth.satisfaction,
+                                "trust_country": growth.trust_country,
+                                "trust_eu": growth.trust_eu
+                            }**/
+                        });
+                    }
+                    else if (type === "trust_country") {
+                        growthData.push({
+                            leaning: leaning,
+                            year: year,
+                            growth: growth.trust_country.cumulative
+                            /**growth: {
+                                "happy": growth.happy,
+                                "satisfaction": growth.satisfaction,
+                                "trust_country": growth.trust_country,
+                                "trust_eu": growth.trust_eu
+                            }**/
+                        });
+                    }
+
+                   
                     allYears.push(year);
                 }
             }
