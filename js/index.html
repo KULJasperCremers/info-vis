@@ -87,7 +87,27 @@
                             <strong>Trust Country</strong>
                         </label>
                     </div>
-                   
+                </div>
+                <div  style="margin-top: 30%;">
+                    <p><strong>Map</strong></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-happy" style="background-color:#FFCC0D;" onclick="selectMapMode(this, 'largest-growth')" checked>
+                        <label class="form-check-label" for="radio-largest-growth">
+                            <strong>Largest growth</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-satisfaction" style="background-color:#00796B;" onclick="selectMapMode(this, 'largest-decline')">
+                        <label class="form-check-label" for="radio-largest-decline">
+                            <strong>Largest decline</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-trust-country" style="background-color:#BF2669;" onclick="selectMapMode(this, 'cumulative-growth')">
+                        <label class="form-check-label" for="radio-cumulative-growth">
+                            <strong>Cumulative growth</strong>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="col">
@@ -143,6 +163,8 @@
     var selectedToDate = undefined;
 
     var selectedSurveyType = "happy";
+    var selectedMapMode = "largest-growth";
+    var selectedCountryColorFunc = countryColorFunc;
 
     var selectedLeanings = [];
 
@@ -155,7 +177,7 @@
             // Otherwise, add the leaning to the array
             selectedLeanings.push(leaning);
         }
-        drawMap(countryColorFuncGrowth);
+        drawMap(selectedCountryColorFunc);
         drawGraphs();
     }
 
@@ -197,11 +219,10 @@
     }
 
     function countryColorFunc(country) {
-        return "white";
+        return ["", "white"];
     }
 
-
-    function countryColorFuncGrowth(country) {
+    function countryColorFuncCumulativeGrowth(country) {
         if (selectedToDate === undefined || selectedFromDate === undefined) {
             return "white";
         }
@@ -230,7 +251,71 @@
         });
         var growth = (aggregateLast - aggregateFirst)
         var normalized_growth = (growth + 100) / 200;
-        return [growth, interpolateRedGreen(normalized_growth)]
+        return [Math.round(growth) + "%", interpolateRedGreen(normalized_growth)]
+    }
+
+    function countryColorFuncLargestGrowth(country) {
+        if (selectedToDate === undefined || selectedFromDate === undefined) {
+            return "white";
+        }
+
+        var growthData = [];
+        for (var year in data[newCountryCodes[country]].electionGrowth) {
+            if (year >= selectedFromDate && year <= selectedToDate) {
+                for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
+                    var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
+
+                    growthData.push({
+                        leaning: leaning,
+                        year: year,
+                        growth: growth.cumulative
+                    });
+                }
+            }
+        }
+
+        /*
+        let largestGrowthEntry = growthData.reduce((max, current) => {
+            return (max.growth > current.growth) ? max : current;
+        }).leaning;
+
+        console.log(growthData);
+        console.log(leaning);
+       */
+
+        return ["", ""]
+    }
+
+    function countryColorFuncLargestDecline(country) {
+        if (selectedToDate === undefined || selectedFromDate === undefined) {
+            return "white";
+        }
+
+        var growthData = [];
+        for (var year in data[newCountryCodes[country]].electionGrowth) {
+            if (year >= selectedFromDate && year <= selectedToDate) {
+                for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
+                    var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
+
+                    growthData.push({
+                        leaning: leaning,
+                        year: year,
+                        growth: growth.cumulative
+                    });
+                }
+            }
+        }
+
+        /*
+        let largestGrowthEntry = growthData.reduce((max, current) => {
+            return (max.growth > current.growth) ? max : current;
+        }).leaning;
+
+        console.log(growthData);
+        console.log(leaning);
+       */
+
+        return ["", ""]
     }
 
     function OnHoverCountry(countryCode) {
@@ -282,7 +367,7 @@
                 selectedFromDate =  dates[Math.round(values[0])];
                 selectedToDate =  dates[Math.round(values[1] - 1)];
 
-                drawMap(countryColorFuncGrowth);
+                drawMap(selectedCountryColorFunc);
                 drawGraphs();
             });
         }
@@ -307,92 +392,15 @@
                 selectedFromDate =  dates[Math.round(values[0])];
                 selectedToDate =  dates[Math.round(values[1] - 1)];
 
-                drawMap(countryColorFuncGrowth);
+                drawMap(selectedCountryColorFunc);
                 drawGraphs();
             });
         }
-        //drawMap(countryColorFuncGrowth);
+        //drawMap(countryColorFuncCumulativeGrowth);
         //drawGraphs();
     }
 
-    drawMap(countryColorFunc);
-
-    /** function graph() {
-        let growthData = aggregateDashboardDataForCountryBetweenYears(cdata, "Belgium", 2003, 2019);
-        let years = Object.keys(growthData.electionGrowth).map(Number);
-        let politicalLeanings = ["far-left", "left", "center-left", "center", "center-right", "right", "far-right"];
-
-        console.log(growthData)
-
-        // Get the graphContainer
-        var graphContainer = document.getElementById('graph').parentNode;
-
-        // Get the width and height of the graphContainer
-        var width = graphContainer.clientWidth;
-        var height = graphContainer.clientHeight;
-
-        // Create an SVG in the graphContainer
-        var svg = d3.select(graphContainer)
-        .append("svg")
-            .attr("width", width - 25)
-            .attr("height", height / 2);
-
-        // Define the scales
-        let xScale = d3.scaleBand().domain(years).range([0, width]);
-        let colorScale = d3.scaleOrdinal().domain(politicalLeanings).range(colors);
-        let yScaleLeft = d3.scaleLinear().domain([-1, 1]).range([height, 0]);
-        let yScaleRight = d3.scaleLinear().domain([-50, 160]).range([height, 0]);
-
-        // Define the line generator
-        let line = d3.line()
-            .x((d) => xScale(d.year))
-            .y((d) => yScaleLeft(d.absoluteGrowth));
-
-            console.log(graphContainer.clientWidth, graphContainer.clientHeight);
-
-        // Loop over the years
-        for (let year of years) {
-            // Loop over the political leanings
-            for (let leaning of politicalLeanings) {
-                // Get the growth data for this year and leaning
-                let growth = growthData.electionGrowth[year][leaning];
-
-                // Check if growth is defined
-                if (growth) {
-                    // Generate a line for the absolute growth
-                    svg.append("path")
-                        .datum(growth)
-                        .attr("fill", "none")
-                        .attr("stroke", colorScale(leaning))
-                        .attr("d", line);
-
-                    // Generate a bar for the relative growth
-                    svg.append("rect")
-                        .attr("class", "bar")
-                        .attr("x", xScale(year))
-                        .attr("y", yScaleRight(growth.relativeGrowth))
-                        .attr("width", xScale.bandwidth())
-                        .attr("height", height - yScaleRight(growth.relativeGrowth))
-                        .attr("fill", colorScale(leaning));
-                }
-            }
-        }
-
-        // Add axes and labels
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(xScale));
-
-        svg.append("g")
-            .call(d3.axisLeft(yScaleLeft));
-
-        svg.append("g")
-            .attr("transform", "translate(" + width + ",0)")
-            .call(d3.axisRight(yScaleRight));
-
-                
-    }
-    **/
+    drawMap(selectedCountryColorFunc);
 
     function interpolateRedGreen(t) {
         if (t < 0 || t > 1) {
@@ -557,7 +565,22 @@
 
     }
    
-
+    function selectMapMode(radio, type) {
+        if (radio.checked) {
+            selectedMapMode = type;
+            
+            if (selectedMapMode === "largest-growth") {
+                selectedCountryColorFunc= countryColorFuncLargestGrowth;
+            }
+            else if (selectedMapMode === "largest-decline") {
+                selectedCountryColorFunc= countryColorFuncLargestDecline;
+            }
+            else if (selectedMapMode === "cumulative-growth") {
+                selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
+            }
+            drawMap(selectedCountryColorFunc);
+        }
+    }
 
     function selectSurvey(radio, type) {
         if (radio.checked) {

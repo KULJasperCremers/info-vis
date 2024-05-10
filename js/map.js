@@ -86,7 +86,7 @@ function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, colorFunc = u
         .text(function(d) {
             var countryExists = countryCodes.hasOwnProperty(d.properties.name);
             if (colorFunc !== undefined && countryExists) {
-                return Math.round(colorFunc(d.properties.name)[0]) + "%";
+                return colorFunc(d.properties.name)[0];
             }
         })
         .style("font-size", "10px") // Adjust size as needed
