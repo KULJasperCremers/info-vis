@@ -9,6 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js"></script>
+
     <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
@@ -21,43 +25,43 @@
                 <div  style="margin-top: 200%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color: #a6cee3;" onclick="selectLeaning('Far Left')" checked>
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color: #a6cee3;" onclick="selectLeaning(this, 'Far Left')">
                         <label class="form-check-label" for="radio-far-left">
                         <strong>Far left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-left" style="background-color: #1f78b4;" onclick="selectLeaning('Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-left" style="background-color: #1f78b4;" onclick="selectLeaning(this, 'Left')">
                         <label class="form-check-label" for="radio-left">
                             <strong>Left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-left" style="background-color: #b2df8a;" onclick="selectLeaning('Center Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-left" style="background-color: #b2df8a;" onclick="selectLeaning(this, 'Center Left')">
                         <label class="form-check-label" for="radio-center-left">
                             <strong>Center Left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center" style="background-color: #33a02c;" onclick="selectLeaning('Center')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center" style="background-color: #33a02c;" onclick="selectLeaning(this, 'Center')">
                         <label class="form-check-label" for="radio-center">
                             <strong>Center</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:#fb9a99;" onclick="selectLeaning('Center Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:#fb9a99;" onclick="selectLeaning(this, 'Center Right')">
                         <label class="form-check-label" for="radio-center-right">
                             <strong>Center Right</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-right" style="background-color:#e31a1c;" onclick="selectLeaning('Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-right" style="background-color:#e31a1c;" onclick="selectLeaning(this, 'Right')">
                         <label class="form-check-label" for="radio-right">
                             <strong>Right</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-right" checked style="background-color:#fdbf6f;" onclick="selectLeaning('Far Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-right" checked style="background-color:#fdbf6f;" onclick="selectLeaning(this, 'Far Right')">
                         <label class="form-check-label" for="radio-far-right">
                             <strong>Far Right</strong>
                         </label>
@@ -68,29 +72,8 @@
             <div class="row chart">
                 <h1 class="text-center">Map filters</h1>
                 <div class="row">
-                    <div class="col">
-                        <p>From (Date)</p>
-                        <div class="dropdown" id="dropdownFrom" style="margin: 1rem;">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownFromButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Dropdown button
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonBigMap">
-                            </div>
-                        </div>
-                    </div>
-    
-                    <div class="col">
-                        <p>To (Date)</p>
-                        <div class="dropdown" id="dropdownTo" style="margin: 1rem;">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownToButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Dropdown button
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonBigMap">
-                                    
-                            </div>
-                        </div>
-                    </div>
-                    
+                    <p>Between <span id="slider-value-lower"></span> and <span id="slider-value-upper"></span></p>
+                    <div id="slider" style="margin-bottom: 1rem; margin-left: 1rem; margin-right: 1rem;"></div>
                 </div>
             </div>
             <div class="row chart">
@@ -122,7 +105,12 @@
         all_dates.sort((a, b) => a - b);
 
         selectCountry("Belgium");
-        // console.log(d)
+
+        document.getElementById("radio-far-right").checked = true;
+        selectLeaning(
+            document.getElementById("radio-far-right"),
+            'Far Right'
+        )
     });
     
     var cellSize = 400;
@@ -133,22 +121,21 @@
     var selectedToDate = undefined;
 
     var selectedLeanings = [];
-    
-    function selectLeaning(leaning) {
-        const index = selectedLeanings.indexOf(leaning);
 
-        if (index > -1) {
+    function selectLeaning(checkbox, leaning) {
+        if (!checkbox.checked) {
             // If the leaning is already in the array, remove it
+            const index = selectedLeanings.indexOf(leaning);
             selectedLeanings.splice(index, 1);
         } else {
             // Otherwise, add the leaning to the array
             selectedLeanings.push(leaning);
         }
         drawMap(countryColorFuncGrowth);
-        drawGraphs(selectedCountry, selectedFromDate, selectedToDate);
+        drawGraphs();
     }
 
-    function drawGraphs(country, date1, date2) {
+    function drawGraphs() {
         // Get the parent container
         var graphContainer = document.getElementById('graph').parentNode;
             
@@ -156,17 +143,23 @@
         while (graphContainer.firstChild) {
             graphContainer.removeChild(graphContainer.firstChild);
         }
+
+        d3.select(graphContainer)
+            .append("h1")
+            .attr("id", "countryHeader")
+            .style("text-align", "center")
+            .text(selectedCountry);
         
         // Create a new 'graph' element
         var svg = d3.select(graphContainer)
-            .append("svg")
+            .append("div")
             .attr("id", "graph");
     
         // Draw the first graph
-        graph(country, date1, date2, svg);
+        graph(selectedCountry, selectedFromDate, selectedToDate, svg);
     
         // Draw the second graph
-        graphSurvey(country, date1, date2, svg);
+        graphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg);
     }
 
     var leaning_mapper = {
@@ -185,9 +178,6 @@
 
 
     function countryColorFuncGrowth(country) {
-        // abs growth
-        // console.log(country + " from: " + selectedFromDate + ", to: " + selectedToDate)
-
         if (selectedToDate === undefined || selectedFromDate === undefined) {
             return "white";
         }
@@ -205,12 +195,7 @@
         selectedLeanings.forEach(l => {
             var leaning = l;
             var mapped_leaning = leaning_mapper[l];
-            /**
-            if (country == "Netherlands") {
-                console.log("TTT: " + first[mapped_leaning]);
-                console.log("TT21T: " + last[mapped_leaning]);
-                console.log(mapped_leaning);
-            }**/
+           
             if (
                 first != undefined && last !== undefined && 
                 first[mapped_leaning] && last[mapped_leaning]
@@ -219,15 +204,6 @@
                 aggregateLast += last[mapped_leaning];
             }
         });
-        /**
-        if (country == "Netherlands") {
-            console.log(selectedLeanings);
-            console.log(first);
-            console.log(aggregateFirst);
-            console.log(last);
-            console.log(aggregateLast);
-        }**/
-
         var growth = (aggregateLast - aggregateFirst)
         var normalized_growth = (growth + 100) / 200;
         return [growth, interpolateRedGreen(normalized_growth)]
@@ -253,62 +229,66 @@
         selectedCountry = country;
         document.getElementById("countryHeader").innerText= country;
 
-        //var dates = get_all_dates(data, newCountryCodes[country]);
+        console.log("T")
 
-        var dates = all_dates;
-
-        selectedFromDate = dates.at(-2);
+        var dates = get_all_dates(data, newCountryCodes[country]);
+        selectedFromDate = dates.at(0);
         selectedToDate = dates.at(-1);
 
-        fillFromDatesDropdown("dropdownFrom", dates, dates.length - 2);
-        fillToDatesDropdown("dropdownTo", dates, dates.length - 1);
+        var slider = document.getElementById('slider');
 
-        drawMap(countryColorFuncGrowth);
-        //graph(selectedCountry, selectedFromDate, selectedToDate)
-    }
+        if (!slider.noUiSlider) {
+            noUiSlider.create(slider, {
+            margin: 2,
+            start: [0, dates.length], // Initial values: [lower, upper]
+            connect: true, // Display a colored bar between the handles
+            range: {
+                'min': 0,
+                'max': dates.length
+            }
+            });
 
-    function fillFromDatesDropdown(id, dates, selectIndex) {
-        var $dropdown = $('#' + id);
-        var $dropdownMenu = $dropdown.find('.dropdown-menu');
-        var $dropdownButton = $dropdown.find('button.dropdown-toggle, a.dropdown-toggle');
+            slider.noUiSlider.on('update', function (values, handle) {
+                var valueLower = document.getElementById('slider-value-lower');
+                var valueUpper = document.getElementById('slider-value-upper');
 
-        $dropdownMenu.empty();
+                valueLower.innerHTML = dates[Math.round(values[0])];
+                valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
 
-        $.each(dates, function(index, year) {
-            $dropdownMenu.append(`<a class="dropdown-item" href="#" data-year="${year}">${year}</a>`);
-        });
+                selectedFromDate =  dates[Math.round(values[0])];
+                selectedToDate =  dates[Math.round(values[1] - 1)];
 
-        $dropdownButton.text(dates[selectIndex]);
+                drawMap(countryColorFuncGrowth);
+                drawGraphs();
+            });
+        }
+        else {
+            slider.noUiSlider.updateOptions({
+                start: [0, dates.length], // Initial values: [lower, upper]
+                margin: 2,
+                connect: true, // Display a colored bar between the handles
+                range: {
+                    'min': 0,
+                    'max': dates.length
+                }
+            });
 
-        $dropdownMenu.on('click', '.dropdown-item', function(e) {
-            var selectedText = $(this).text();
-            $dropdownButton.text(selectedText); 
-            selectedFromDate = selectedText;
+            slider.noUiSlider.on('update', function (values, handle) {
+                var valueLower = document.getElementById('slider-value-lower');
+                var valueUpper = document.getElementById('slider-value-upper');
 
-            drawMap(countryColorFuncGrowth);
-        });
-    }
+                valueLower.innerHTML = dates[Math.round(values[0])];
+                valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
 
-    function fillToDatesDropdown(id, dates, selectIndex) {
-        var $dropdown = $('#' + id);
-        var $dropdownMenu = $dropdown.find('.dropdown-menu');
-        var $dropdownButton = $dropdown.find('button.dropdown-toggle, a.dropdown-toggle');
+                selectedFromDate =  dates[Math.round(values[0])];
+                selectedToDate =  dates[Math.round(values[1] - 1)];
 
-        $dropdownMenu.empty();
-
-        $.each(dates, function(index, year) {
-            $dropdownMenu.append(`<a class="dropdown-item" href="#" data-year="${year}">${year}</a>`);
-        });
-
-        $dropdownButton.text(dates[selectIndex]);
-
-        $dropdownMenu.on('click', '.dropdown-item', function(e) {
-            var selectedText = $(this).text();
-            $dropdownButton.text(selectedText);
-            selectedToDate = selectedText;
-
-            drawMap(countryColorFuncGrowth);
-        });
+                drawMap(countryColorFuncGrowth);
+                drawGraphs();
+            });
+        }
+        //drawMap(countryColorFuncGrowth);
+        //drawGraphs();
     }
 
     drawMap(countryColorFunc);
@@ -427,7 +407,7 @@
         var growthData = [];
         var allYears = [];
         for (var year in data[newCountryCodes[country]].electionGrowth) {
-            if (year > date1 || year < date2) {
+            if (year >= date1 && year <= date2) {
                 for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
                     var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
                     growthData.push({
@@ -439,8 +419,6 @@
                 }
             }
         }
-
-        // console.log(growthData)
 
         // Find the min and max growth values
         var growthMin = d3.min(growthData, function(d) { return d.growth; });
@@ -573,7 +551,7 @@
         var growthData = [];
         var allYears = [];
         for (var year in data[newCountryCodes[country]].surveyGrowth) {
-            if (year > date1 || year < date2) {
+            if (year >= date1 && year <= date2) {
                 for (var leaning in data[newCountryCodes[country]].surveyGrowth[year]) {
                     var growth = data[newCountryCodes[country]].surveyGrowth[year][leaning];
                     //console.log(data[newCountryCodes[country]].surveyGrowth[year][leaning])
@@ -592,7 +570,6 @@
                 }
             }
         }
-        console.log(growthData)
 
         /**
         var maxGrowth = { happy: -Infinity, satisfaction: -Infinity, trust_country: -Infinity, trust_eu: -Infinity };
@@ -616,8 +593,6 @@
         // Find the min and max growth values
         var growthMin = d3.min(growthData, function(d) { return d.growth; });
         var growthMax = d3.max(growthData, function(d) { return d.growth; });
-
-        console.log(growthMin, growthMax)
 
         // Create a scale for your growth data
         var growthScale = d3.scaleLinear()
@@ -712,7 +687,6 @@
             return false;
         });
 
-        console.log(filteredDataByLeaning)
 
         // Append your lines to the SVG
         filteredDataByLeaning.forEach(function([key, values]) {
@@ -735,9 +709,14 @@
 
     }
 
+  
+
 </script>
 
 </body>
 
 </html>
 
+<style>
+
+</style>
