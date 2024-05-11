@@ -461,7 +461,7 @@
         // Create a scale for your growth data
         var growthScale = d3.scaleLinear()
             .domain([growthMin, growthMax])
-            .range([-1, 1]);
+            .range([0, 1]);
 
         // Get the parent container
         var graphContainer = document.getElementById('graph').parentNode;
@@ -478,7 +478,7 @@
         .append("svg")
             .attr("id", "graph")
             .attr("width", width - 25)
-            .attr("height", height / 2);
+            .attr("height", height / 1.75);
 
         // Define margins for the x-axis
         var xAxisMargin = 50;
@@ -490,7 +490,7 @@
 
         // Create a scale for your y-axis
         var y = d3.scaleLinear()
-        .domain([-1, 1]) 
+        .domain([0, 1]) 
         .range([height / 2 - 20, 25]); 
 
         // Add the y-axis to your SVG
@@ -507,7 +507,7 @@
             .attr("stroke", "#ccc") // Change this to the color you want
             .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
             .attr("y1", 0)
-            .attr("y2", height)
+            .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
             .attr("x1", function(d) { return x(d); })
             .attr("x2", function(d) { return x(d); });
 
@@ -561,10 +561,10 @@
 
         // Move the x-axis labels to the bottom of the grid lines
         xAxis.selectAll("text")
-        .attr("dy", y(0) - 15); // Adjust the 15 to move the labels up or down
+        .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
 
     }
-   
+    
     function selectMapMode(radio, type) {
         if (radio.checked) {
             selectedMapMode = type;
@@ -618,7 +618,7 @@
         var growthData = [];
         var allYears = [];
         for (var year in data[newCountryCodes[country]].surveyGrowth) {
-            if (year => date1 && year <= date2) {
+            if (year >= date1 && year <= date2) {
                 for (var leaning in data[newCountryCodes[country]].surveyGrowth[year]) {
                     var growth = data[newCountryCodes[country]].surveyGrowth[year][leaning];
                     //console.log(data[newCountryCodes[country]].surveyGrowth[year][leaning])
@@ -677,7 +677,7 @@
         // Create a scale for your growth data
         var growthScale = d3.scaleLinear()
             .domain([growthMin, growthMax])
-            .range([-1, 1]);
+            .range([0, 1]);
 
         // Get the parent container
         var graphContainer = document.getElementById('graph').parentNode;
@@ -694,7 +694,7 @@
         .append("svg")
             .attr("id", "graph")
             .attr("width", width - 25)
-            .attr("height", height / 2);
+            .attr("height", height / 1.75);
 
         // Define margins for the x-axis
         var xAxisMargin = 50;
@@ -706,8 +706,8 @@
 
         // Create a scale for your y-axis
         var y = d3.scaleLinear()
-        .domain([-1, 1]) 
-        .range([height / 2 - 20, 25]); 
+        .domain([0, 1]) 
+        .range([height / 2, 25]); 
 
         // Add the y-axis to your SVG
         svg.append("g")
@@ -723,9 +723,10 @@
             .attr("stroke", "#ccc") // Change this to the color you want
             .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
             .attr("y1", 0)
-            .attr("y2", height)
+            .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
             .attr("x1", function(d) { return x(d); })
             .attr("x2", function(d) { return x(d); });
+
 
         // Define color scale
         var color = d3.scaleOrdinal()
@@ -777,7 +778,7 @@
 
         // Move the x-axis labels to the bottom of the grid lines
         xAxis.selectAll("text")
-        .attr("dy", y(0) - 15); // Adjust the 15 to move the labels up or down
+        .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
     }
 
   
