@@ -148,7 +148,15 @@
 
         selectCountry("Belgium");
 
+        
+        document.getElementById("radio-far-left").checked = false;
+        document.getElementById("radio-left").checked = false;
+        document.getElementById("radio-center-left").checked = false;
+        document.getElementById("radio-center").checked = false;
+        document.getElementById("radio-center-right").checked = false;
+        document.getElementById("radio-right").checked = false;
         document.getElementById("radio-far-right").checked = true;
+
         selectLeaning(
             document.getElementById("radio-far-right"),
             'Far Right'
@@ -168,6 +176,17 @@
 
     var selectedLeanings = [];
 
+    var leaning_colors = {
+        "far-left": "#a6cee3",
+        "left": "#1f78b4",
+        "center-left": "#b2df8a",
+        "center": "#33a02c",
+        "center-right": "#fb9a99",
+        "right": "#e31a1c",
+        "far-right": "#fdbf6f"
+    }
+
+
     function selectLeaning(checkbox, leaning) {
         if (!checkbox.checked) {
             // If the leaning is already in the array, remove it
@@ -177,7 +196,7 @@
             // Otherwise, add the leaning to the array
             selectedLeanings.push(leaning);
         }
-        drawMap(selectedCountryColorFunc);
+        colorMap("#map", selectedCountryColorFunc);
         drawGraphs();
     }
 
@@ -259,31 +278,40 @@
             return "white";
         }
 
-        var growthData = [];
-        for (var year in data[newCountryCodes[country]].electionGrowth) {
-            if (year >= selectedFromDate && year <= selectedToDate) {
-                for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
-                    var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
+        var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
+        var dates = Object.keys(leaning_data);
 
-                    growthData.push({
-                        leaning: leaning,
-                        year: year,
-                        growth: growth.cumulative
-                    });
+        //leaning = leaning_mapper[selectedLeaning]
+        first = leaning_data[dates[0]]
+        last = leaning_data[dates.at(-1)]
+
+        var growth = {};
+
+        selectedLeanings.forEach(l => {
+            var leaning = l;
+            var mapped_leaning = leaning_mapper[l];
+           
+            if (
+                first != undefined && last !== undefined && 
+                last[mapped_leaning] !== undefined &&  first[mapped_leaning] !== undefined
+            ) { 
+                if (growth[mapped_leaning] === undefined) {
+                    growth[mapped_leaning] = 0;
                 }
+                             
+                growth[mapped_leaning] = last[mapped_leaning] - first[mapped_leaning];
             }
-        }
+        });
 
-        /*
-        let largestGrowthEntry = growthData.reduce((max, current) => {
-            return (max.growth > current.growth) ? max : current;
-        }).leaning;
+        
+        let largestGrowthEntry = Object.entries(growth).reduce((max, current) => {
+            return (max[1] > current[1]) ? max : current;
+        })[0]; 
+        
+        console.log(country + ": " + largestGrowthEntry);
+        console.log(growth)
 
-        console.log(growthData);
-        console.log(leaning);
-       */
-
-        return ["", ""]
+        return ["", leaning_colors[largestGrowthEntry]]
     }
 
     function countryColorFuncLargestDecline(country) {
@@ -291,31 +319,38 @@
             return "white";
         }
 
-        var growthData = [];
-        for (var year in data[newCountryCodes[country]].electionGrowth) {
-            if (year >= selectedFromDate && year <= selectedToDate) {
-                for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
-                    var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
+        var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
+        var dates = Object.keys(leaning_data);
 
-                    growthData.push({
-                        leaning: leaning,
-                        year: year,
-                        growth: growth.cumulative
-                    });
+        //leaning = leaning_mapper[selectedLeaning]
+        first = leaning_data[dates[0]]
+        last = leaning_data[dates.at(-1)]
+
+        var growth = {};
+
+        selectedLeanings.forEach(l => {
+            var leaning = l;
+            var mapped_leaning = leaning_mapper[l];
+           
+            if (
+                first != undefined && last !== undefined && 
+                last[mapped_leaning] !== undefined &&  first[mapped_leaning] !== undefined
+            ) { 
+                if (growth[mapped_leaning] === undefined) {
+                    growth[mapped_leaning] = 0;
                 }
+                             
+                growth[mapped_leaning] = last[mapped_leaning] - first[mapped_leaning];
             }
-        }
+        });
 
-        /*
-        let largestGrowthEntry = growthData.reduce((max, current) => {
-            return (max.growth > current.growth) ? max : current;
-        }).leaning;
+        
+        let largestDeclinerEntry = Object.entries(growth).reduce((min, current) => {
+            return (min[1] < current[1]) ? min : current;
+        })[0]; 
+        
 
-        console.log(growthData);
-        console.log(leaning);
-       */
-
-        return ["", ""]
+        return ["", leaning_colors[largestDeclinerEntry]]
     }
 
     function OnHoverCountry(countryCode) {
@@ -367,7 +402,7 @@
                 selectedFromDate =  dates[Math.round(values[0])];
                 selectedToDate =  dates[Math.round(values[1] - 1)];
 
-                drawMap(selectedCountryColorFunc);
+                colorMap("#map", selectedCountryColorFunc);
                 drawGraphs();
             });
         }
@@ -392,7 +427,7 @@
                 selectedFromDate =  dates[Math.round(values[0])];
                 selectedToDate =  dates[Math.round(values[1] - 1)];
 
-                drawMap(selectedCountryColorFunc);
+                colorMap("#map", selectedCountryColorFunc);
                 drawGraphs();
             });
         }
@@ -578,7 +613,7 @@
             else if (selectedMapMode === "cumulative-growth") {
                 selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
             }
-            drawMap(selectedCountryColorFunc);
+            colorMap("#map", selectedCountryColorFunc);
         }
     }
 
