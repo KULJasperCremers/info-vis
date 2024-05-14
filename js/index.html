@@ -91,19 +91,19 @@
                 <div  style="margin-top: 30%;">
                     <p><strong>Map</strong></p>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-happy" style="background-color:#FFCC0D;" onclick="selectMapMode(this, 'largest-growth')" checked>
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-growth" style="background-color:#FFCC0D;" onclick="selectMapMode(this, 'largest-growth')" checked>
                         <label class="form-check-label" for="radio-largest-growth">
                             <strong>Largest growth</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-satisfaction" style="background-color:#00796B;" onclick="selectMapMode(this, 'largest-decline')">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-decline" style="background-color:#00796B;" onclick="selectMapMode(this, 'largest-decline')">
                         <label class="form-check-label" for="radio-largest-decline">
                             <strong>Largest decline</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-trust-country" style="background-color:#BF2669;" onclick="selectMapMode(this, 'cumulative-growth')">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-cumulative-growth" style="background-color:#BF2669;" onclick="selectMapMode(this, 'cumulative-growth')">
                         <label class="form-check-label" for="radio-cumulative-growth">
                             <strong>Cumulative growth</strong>
                         </label>
@@ -136,7 +136,6 @@
     //d3.json("../json/allCountryData.json").then(function(d) {
     d3.json("../json/allCountryData.json").then(function(d) {
         data = d;
-        console.log(data)
         
         Object.values(newCountryCodes).forEach(element => {
             var dates = get_all_dates(data, element);
@@ -278,6 +277,8 @@
             return "white";
         }
 
+        console.log("test");
+
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
@@ -308,9 +309,6 @@
             return (max[1] > current[1]) ? max : current;
         })[0]; 
         
-        console.log(country + ": " + largestGrowthEntry);
-        console.log(growth)
-
         return ["", leaning_colors[largestGrowthEntry]]
     }
 
@@ -372,8 +370,6 @@
     function selectCountry(country) {
         selectedCountry = country;
         document.getElementById("countryHeader").innerText= country;
-
-        console.log("T")
 
         var dates = get_all_dates(data, newCountryCodes[country]);
         selectedFromDate = dates.at(0);
@@ -455,181 +451,154 @@
     }
 
     function graph(country, date1, date2, svg) {
-        var newCountryCodes = {
-            "Austria": "AT",
-            "Belgium": "BE",
-            "Germany": "DE",
-            "Denmark": "DK",
-            "Greece": "EL",
-            "Spain": "ES",
-            "Finland": "FI",
-            "France": "FR",
-            "Ireland": "IE",
-            "Italy": "IT",
-            "Netherlands": "NL",
-            "Portugal": "PT",
-            "Sweden": "SE", 
-        }
-
-        var growthData = [];
-        var allYears = [];
-        for (var year in data[newCountryCodes[country]].electionGrowth) {
-            if (year >= date1 && year <= date2) {
-                for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
-                    var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
-                    growthData.push({
-                        leaning: leaning,
-                        year: year,
-                        growth: growth.cumulative
-                    });
-                    allYears.push(year);
-                }
-            }
-        }
-
-        // console.log(growthData)
-
-        // Find the min and max growth values
-        var growthMin = d3.min(growthData, function(d) { return d.growth; });
-        var growthMax = d3.max(growthData, function(d) { return d.growth; });
-
-        // Create a scale for your growth data
-        var growthScale = d3.scaleLinear()
-            .domain([growthMin, growthMax])
-            .range([0, 1]);
-
-        // Get the parent container
-        var graphContainer = document.getElementById('graph').parentNode;
-
-        // Remove the old SVG
-        //d3.select("#graph").remove();
-
-        // Get the width and height of the graphContainer
-        var width = graphContainer.clientWidth;
-        var height = graphContainer.clientHeight;
-
-        // Create an SVG in the graphContainer
-        svg = d3.select(graphContainer)
-        .append("svg")
-            .attr("id", "graph")
-            .attr("width", width - 25)
-            .attr("height", height / 1.75);
-
-        // Define margins for the x-axis
-        var xAxisMargin = 50;
-
-        // Create a scale for your x-axis
-        var x = d3.scalePoint()
-        .domain(allYears) 
-        .range([xAxisMargin, width - 25 - xAxisMargin]); // Leave space on both sides of the x-axis
-
-        // Create a scale for your y-axis
-        var y = d3.scaleLinear()
-        .domain([0, 1]) 
-        .range([height / 2 - 20, 25]); 
-
-        // Add the y-axis to your SVG
-        svg.append("g")
-        .attr("transform", "translate(" + xAxisMargin + ",0)")
-        .call(d3.axisLeft(y).ticks(5));
-
-        // Add grid lines for each x-axis tick
-        svg.selectAll(".grid-line")
-            .data(x.domain())
-            .enter()
-            .append("line")
-            .attr("class", "grid-line")
-            .attr("stroke", "#ccc") // Change this to the color you want
-            .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
-            .attr("y1", 0)
-            .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
-            .attr("x1", function(d) { return x(d); })
-            .attr("x2", function(d) { return x(d); });
-
-        // Define color scale
-        var color = d3.scaleOrdinal()
-        .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-        .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
-
-        // Define your line
-        var line = d3.line()
-            .x(function(d) { return x(d.year); }) 
-            .y(function(d) { return y(d.growth); });
-
-        // Group the data by leaning
-        var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
-
-        // Scale the growth data in dataByLeaning
-        dataByLeaning = dataByLeaning.map(([key, values]) => {
-            return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
-        });
-
-        // Filter the data to include only the selected leanings
-        var filteredDataByLeaning = []
-        
-        // Filter the data to include only the selected leanings
-        var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
-            for (var l in selectedLeanings) {
-                if (leaning_mapper[selectedLeanings[l]] == key) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        //console.log(filteredDataByLeaning)
-
-        // Append your lines to the SVG
-        filteredDataByLeaning.forEach(function([key, values]) {
-            svg.append("path")
-            .datum(values)
-            .attr("fill", "none")
-            .attr("stroke", color(key))
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
-        });
-
-        // Add the x-axis to your SVG
-        var xAxis = svg.append("g")
-        .attr("transform", "translate(0," + y(0) + ")")
-        .call(d3.axisBottom(x));
-
-        // Move the x-axis labels to the bottom of the grid lines
-        xAxis.selectAll("text")
-        .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
-
+    var newCountryCodes = {
+        "Austria": "AT",
+        "Belgium": "BE",
+        "Germany": "DE",
+        "Denmark": "DK",
+        "Greece": "EL",
+        "Spain": "ES",
+        "Finland": "FI",
+        "France": "FR",
+        "Ireland": "IE",
+        "Italy": "IT",
+        "Netherlands": "NL",
+        "Portugal": "PT",
+        "Sweden": "SE",
     }
-    
-    function selectMapMode(radio, type) {
-        if (radio.checked) {
-            selectedMapMode = type;
-            
-            if (selectedMapMode === "largest-growth") {
-                selectedCountryColorFunc= countryColorFuncLargestGrowth;
+
+    var growthData = [];
+    var allYears = [];
+    for (var year in data[newCountryCodes[country]].electionGrowth) {
+        if (year >= date1 && year <= date2) {
+            for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
+                var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
+                growthData.push({
+                    leaning: leaning,
+                    year: year,
+                    growth: growth.cumulative
+                });
+                allYears.push(year);
             }
-            else if (selectedMapMode === "largest-decline") {
-                selectedCountryColorFunc= countryColorFuncLargestDecline;
-            }
-            else if (selectedMapMode === "cumulative-growth") {
-                selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
-            }
-            colorMap("#map", selectedCountryColorFunc);
         }
     }
 
-    function selectSurvey(radio, type) {
-        if (radio.checked) {
-            selectedSurveyType = type;
+    // console.log(growthData)
 
-            var graphContainer = document.getElementById('graph').parentNode;
-            
-            // Remove all child elements of the graphContainer
-            graphContainer.removeChild(graphContainer.lastChild);
+    // Find the min and max growth values
+    var growthMin = d3.min(growthData, function(d) { return d.growth; });
+    var growthMax = d3.max(growthData, function(d) { return d.growth; });
 
-            graphSurvey(selectedCountry, selectedFromDate, selectedToDate, graphContainer, type);
+    // Create a scale for your growth data
+    var growthScale = d3.scaleLinear()
+        .domain([growthMin, growthMax])
+        .range([0, 1]);
+
+    // Get the parent container
+    var graphContainer = document.getElementById('graph').parentNode;
+
+    // Remove the old SVG
+    //d3.select("#graph").remove();
+
+    // Get the width and height of the graphContainer
+    var width = graphContainer.clientWidth;
+    var height = graphContainer.clientHeight;
+
+    // Create an SVG in the graphContainer
+    svg = d3.select(graphContainer)
+    .append("svg")
+        .attr("id", "graph")
+        .attr("width", width - 25)
+        .attr("height", height / 1.75);
+
+    // Define margins for the x-axis
+    var xAxisMargin = 50;
+
+    // Create a scale for your x-axis
+    var x = d3.scalePoint()
+    .domain(allYears)
+    .range([xAxisMargin, width - 25 - xAxisMargin]); // Leave space on both sides of the x-axis
+
+    // Create a scale for your y-axis
+    var y = d3.scaleLinear()
+    .domain([0, 1])
+    .range([height / 2 - 20, 25]);
+
+    // Add the y-axis to your SVG
+    svg.append("g")
+    .attr("transform", "translate(" + xAxisMargin + ",0)")
+    .call(d3.axisLeft(y).ticks(5));
+
+    // Add grid lines for each x-axis tick
+    svg.selectAll(".grid-line")
+        .data(x.domain())
+        .enter()
+        .append("line")
+        .attr("class", "grid-line")
+        .attr("stroke", "#ccc") // Change this to the color you want
+        .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
+        .attr("y1", 0)
+        .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
+        .attr("x1", function(d) { return x(d); })
+        .attr("x2", function(d) { return x(d); });
+
+    // Define color scale
+    var color = d3.scaleOrdinal()
+    .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
+    .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
+
+    // Define your line
+    var line = d3.line()
+        .x(function(d) { return x(d.year); })
+        .y(function(d) { return y(d.growth); });
+
+    // Group the data by leaning
+    var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
+
+    // Scale the growth data in dataByLeaning
+    dataByLeaning = dataByLeaning.map(([key, values]) => {
+        return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
+    });
+
+    // Filter the data to include only the selected leanings
+    var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
+        for (var l in selectedLeanings) {
+            if (leaning_mapper[selectedLeanings[l]] == key) {
+                return true;
+            }
         }
-    }
+        return false;
+    });
 
+    //console.log(filteredDataByLeaning)
+
+    // Append your lines to the SVG
+    filteredDataByLeaning.forEach(function([key, values]) {
+        svg.append("path")
+        .datum(values)
+        .attr("fill", "none")
+        .attr("stroke", color(key))
+        .attr("stroke-width", 1.5)
+        .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
+        .attr("d", line)
+        .on("mouseover", function() {
+            d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
+            d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+        })
+        .on("mouseout", function() {
+            d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
+        });
+    });
+
+    // Add the x-axis to your SVG
+    var xAxis = svg.append("g")
+    .attr("transform", "translate(0," + y(0) + ")")
+    .call(d3.axisBottom(x));
+
+    // Move the x-axis labels to the bottom of the grid lines
+    xAxis.selectAll("text")
+    .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
+}
 
     function graphSurvey(country, date1, date2, svg, type) {
         var newCountryCodes = {
@@ -647,8 +616,6 @@
             "Portugal": "PT",
             "Sweden": "SE", 
         }
-
-        console.log(type);
 
         var growthData = [];
         var allYears = [];
@@ -703,7 +670,6 @@
                 }
             }
         }
-        console.log(growthData)
 
         // Find the min and max growth values
         var growthMin = d3.min(growthData, function(d) { return d.growth; });
@@ -798,13 +764,21 @@
 
         // Append your lines to the SVG
         filteredDataByLeaning.forEach(function([key, values]) {
-            svg.append("path")
-            .datum(values)
-            .attr("fill", "none")
-            .attr("stroke", color(key))
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
+        svg.append("path")
+        .datum(values)
+        .attr("fill", "none")
+        .attr("stroke", color(key))
+        .attr("stroke-width", 1.5)
+        .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
+        .attr("d", line)
+        .on("mouseover", function() {
+            d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
+            d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+        })
+        .on("mouseout", function() {
+            d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
         });
+    });
 
         // Add the x-axis to your SVG
         var xAxis = svg.append("g")
@@ -817,6 +791,42 @@
     }
 
   
+    
+    function selectMapMode(radio, type) {
+        if (radio.checked) {
+            selectedMapMode = type;
+            
+            if (selectedMapMode === "largest-growth") {
+                selectedCountryColorFunc= countryColorFuncLargestGrowth;
+                colorMap("#map", selectedCountryColorFunc);
+            }
+            else if (selectedMapMode === "largest-decline") {
+                selectedCountryColorFunc= countryColorFuncLargestDecline; 
+                colorMap("#map", selectedCountryColorFunc);
+            }
+            else if (selectedMapMode === "cumulative-growth") {
+                selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
+                colorMap("#map", selectedCountryColorFunc, true);
+            }
+           
+        }
+    }
+
+    function selectSurvey(radio, type) {
+        if (radio.checked) {
+            selectedSurveyType = type;
+
+            var graphContainer = document.getElementById('graph').parentNode;
+            
+            // Remove all child elements of the graphContainer
+            graphContainer.removeChild(graphContainer.lastChild);
+
+            graphSurvey(selectedCountry, selectedFromDate, selectedToDate, graphContainer, type);
+        }
+    }
+
+
+    
 
 </script>
 
