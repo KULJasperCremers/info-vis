@@ -122,7 +122,7 @@
                 <h1 class="text-center">Date Selection</h1>
                 <div class="row">
                     <p>Between <span id="slider-value-lower"></span> and <span id="slider-value-upper"></span></p>
-                    <div id="slider" style="margin-bottom: 1rem; margin-left: 1rem; margin-right: 1rem;"></div>
+                    <div id="slider" style="margin-bottom: 3rem; margin-left: 1rem; margin-right: 1rem;"></div>
                 </div>
             </div>
             <div class="row chart">
@@ -137,6 +137,35 @@
 
     let data;
     let all_dates = [];
+    
+
+    let map;
+    let geodata;
+    let geojsonLayer ;
+    
+    var cellSize = 400;
+    var selectedCountry = undefined; 
+    var selectedLeaning = "Far Right"
+
+    var selectedFromDate = undefined;
+    var selectedToDate = undefined;
+
+    var selectedSurveyType = "happy";
+    var selectedMapMode = "largest-growth";
+    var selectedCountryColorFunc = countryColorFuncLargestGrowth;
+
+    var selectedLeanings = [];
+
+    var leaning_colors = {
+        "far-left": "#a6cee3",
+        "left": "#1f78b4",
+        "center-left": "#b2df8a",
+        "center": "#33a02c",
+        "center-right": "#fb9a99",
+        "right": "#e31a1c",
+        "far-right": "#fdbf6f"
+    }
+
     //d3.json("../json/allCountryData.json").then(function(d) {
     d3.json("../json/allCountryData.json").then(function(d) {
         data = d;
@@ -164,56 +193,70 @@
             document.getElementById("radio-far-right"),
             'Far Right'
         )
-
- 
-    });
-
-    let map;
-
-    d3.json("../json/geojson.json").then(function(d) {
+        return d3.json("../json/geojson.json");
+    }).then(function(d) {
+        geodata = d;
         map = L.map('map', { 
-            zoomControl: false,
-            scrollWheelZoom: false,
-            dragging: false,
-            touchZoom: false,
-            doubleClickZoom: false,
-            boxZoom: false
-         }).setView([52, 13], 4); // Centered around Europe
+          
+         }).setView([56, 10], 4); // Centered around Europe
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
-        L.geoJSON(d, {
-            // Define a function to set the style of each feature
-            style: function(feature) {
-                return {color: countryColorFuncLargestGrowth(feature.properties.name)[1] }
-            }
+        geojsonLayer  = L.geoJSON(geodata, {
+        onEachFeature: function(feature, layer) {
+            layer.on('click', function() {
+                OnClickCountry(feature.properties.name);
+            });
         }
-        ).addTo(map);
+    }).addTo(map);
+        colorMap();
+        colorBorder();
     });
 
-    
-    var cellSize = 400;
-    var selectedCountry = undefined; 
-    var selectedLeaning = "Far Right"
+    let countryColors = {}
 
-    var selectedFromDate = undefined;
-    var selectedToDate = undefined;
+    var countryCodes = {
+    "Austria": "AT",
+    "Belgium": "BE",
+    "Germany": "DE",
+    "Denmark": "DK",
+    "Greece": "EL",
+    "Spain": "ES",
+    "Finland": "FI",
+    "France": "FR",
+    "Ireland": "IE",
+    "Italy": "IT",
+    "Netherlands": "NL",
+    "Portugal": "PT",
+    "Sweden": "SE",
+}
 
-    var selectedSurveyType = "happy";
-    var selectedMapMode = "largest-growth";
-    var selectedCountryColorFunc = countryColorFunc;
+    function colorMap() {
+        
+        if (geojsonLayer) {
+            for (let key in countryCodes) {
+                countryColors[key] = selectedCountryColorFunc(key)[1];
+            }
 
-    var selectedLeanings = [];
+            geojsonLayer.setStyle(function(feature) {
+                return { 
+                    color: countryColors[feature.properties.name]
+                };
+            });
+        }
+    }
 
-    var leaning_colors = {
-        "far-left": "#a6cee3",
-        "left": "#1f78b4",
-        "center-left": "#b2df8a",
-        "center": "#33a02c",
-        "center-right": "#fb9a99",
-        "right": "#e31a1c",
-        "far-right": "#fdbf6f"
+    function colorBorder() {
+        if (geojsonLayer) {
+            geojsonLayer.setStyle(function(feature) {
+                let key = feature.properties.name;
+                return { 
+                    color: countryColors[key],
+                    weight: key === selectedCountry ? "5" : 0.5
+                };
+            });
+        }
     }
 
 
@@ -227,14 +270,7 @@
             selectedLeanings.push(leaning);
         }
 
-        L.geoJSON(d, {
-            // Define a function to set the style of each feature
-            style: function(feature) {
-                return {color: countryColorFuncLargestGrowth(feature.properties.name)[1] }
-            }
-        }
-        ).addTo(map);
-
+        colorMap(selectedCountryColorFunc);
         drawGraphs();
     }
 
@@ -398,53 +434,43 @@
     function OnClickCountry(countryCode) {
         // console.log("click: " + countryCode);
         selectCountry(countryCode)
+        colorBorder();
     }
 
-    function drawMap(colorFunc) {
-        return;
-        d3.select('#map').selectAll('*').remove();
-        var mapContainer = document.getElementById('map').parentNode;
-        var w = mapContainer.clientWidth;
-        var h = w * 1;  
-        var svg = AppendMap('#map', OnHoverCountry, OnClickCountry, colorFunc, w, h);
-    }
+    let dates;
 
     function selectCountry(country) {
         selectedCountry = country;
-        document.getElementById("countryHeader").innerText= country;
+        document.getElementById("countryHeader").innerText = country;
 
-        var dates = get_all_dates(data, newCountryCodes[country]);
+        dates = get_all_dates(data, newCountryCodes[country]);
         selectedFromDate = dates.at(0);
         selectedToDate = dates.at(-1);
+
+
+
+        console.log(dates.map(Number));
 
         var slider = document.getElementById('slider');
 
         if (!slider.noUiSlider) {
             noUiSlider.create(slider, {
-            margin: 2,
-            start: [0, dates.length], // Initial values: [lower, upper]
-            connect: true, // Display a colored bar between the handles
-            range: {
-                'min': 0,
-                'max': dates.length
-            }
+                margin: 2,
+                start: [0, dates.length], // Initial values: [lower, upper]
+                connect: true, // Display a colored bar between the handles
+                range: {
+                    'min': 0,
+                    'max': dates.length
+                },
+                pips: {
+                    mode: 'values',
+                    values: [0, 1, 2, 3, 4, 5],
+                    density: dates.length
+                }
             });
 
-            slider.noUiSlider.on('update', function (values, handle) {
-                var valueLower = document.getElementById('slider-value-lower');
-                var valueUpper = document.getElementById('slider-value-upper');
-
-                valueLower.innerHTML = dates[Math.round(values[0])];
-                valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
-
-                selectedFromDate =  dates[Math.round(values[0])];
-                selectedToDate =  dates[Math.round(values[1] - 1)];
-
-                colorMap("#map", selectedCountryColorFunc);
-                drawGraphs();
-            });
-        }
-        else {
+            attachSliderUpdateListener(slider, dates);
+        } else {
             slider.noUiSlider.updateOptions({
                 start: [0, dates.length], // Initial values: [lower, upper]
                 margin: 2,
@@ -452,28 +478,39 @@
                 range: {
                     'min': 0,
                     'max': dates.length
+                },
+                pips: {
+                    mode: 'values',
+                    values: dates.map(Number),
+                    density: dates.length
                 }
-            });
-
-            slider.noUiSlider.on('update', function (values, handle) {
-                var valueLower = document.getElementById('slider-value-lower');
-                var valueUpper = document.getElementById('slider-value-upper');
-
-                valueLower.innerHTML = dates[Math.round(values[0])];
-                valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
-
-                selectedFromDate =  dates[Math.round(values[0])];
-                selectedToDate =  dates[Math.round(values[1] - 1)];
-
-                colorMap("#map", selectedCountryColorFunc);
-                drawGraphs();
-            });
+            }, true); // Reset existing options without adding new event listeners
         }
-        //drawMap(countryColorFuncCumulativeGrowth);
-        //drawGraphs();
+
+        colorMap();
+        drawGraphs();
     }
 
-    drawMap(selectedCountryColorFunc);
+    function attachSliderUpdateListener(slider) {
+        slider.noUiSlider.on('update', function (values, handle) {
+            var valueLower = document.getElementById('slider-value-lower');
+            var valueUpper = document.getElementById('slider-value-upper');
+
+            valueLower.innerHTML = dates[Math.round(values[0])];
+            valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
+
+            var newFromDate = dates[Math.round(values[0])];
+            var newToDate = dates[Math.round(values[1] - 1)];
+
+            if (newFromDate !== selectedFromDate || newToDate !== selectedToDate) {
+                colorMap();
+                drawGraphs();
+
+                selectedFromDate = newFromDate;
+                selectedToDate = newToDate;
+            }
+        });
+    }
 
     function interpolateRedGreen(t) {
         if (t < 0 || t > 1) {
@@ -840,16 +877,15 @@
             
             if (selectedMapMode === "largest-growth") {
                 selectedCountryColorFunc= countryColorFuncLargestGrowth;
-                colorMap("#map", selectedCountryColorFunc);
+                console.log("largest growth");
             }
             else if (selectedMapMode === "largest-decline") {
                 selectedCountryColorFunc= countryColorFuncLargestDecline; 
-                colorMap("#map", selectedCountryColorFunc);
             }
             else if (selectedMapMode === "cumulative-growth") {
                 selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
-                colorMap("#map", selectedCountryColorFunc, true);
             }
+            colorMap();
            
         }
     }
