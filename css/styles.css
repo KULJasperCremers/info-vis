@@ -59,3 +59,11 @@
     }
 
     #map { height: 44.1rem; }
+
+    .leaflet-tooltip.no-background {
+        background: transparent;      /* No background */
+        border: none;                 /* No borders */
+        box-shadow: none;             /* No shadow */
+        color: black;                 /* Text color */
+        font-size: 12px;              /* Smaller text size */
+    }

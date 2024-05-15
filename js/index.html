@@ -201,26 +201,45 @@
         )
         return d3.json("../json/geojson.json");
     }).then(function(d) {
-        geodata = d;
-        map = L.map('map', { 
-          
-         }).setView([56, 10], 4); // Centered around Europe
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-        geojsonLayer  = L.geoJSON(geodata, {
-        onEachFeature: function(feature, layer) {
-            layer.on('click', function() {
-                OnClickCountry(feature.properties.name);
-            });
+            geodata = d;
+            map = L.map('map', { 
+                zoomControl: false,
+                scrollWheelZoom: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                boxZoom: false
+            }).setView([56, 10], 4); // Centered around Europe
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+            geojsonLayer = L.geoJSON(geodata, {
+                onEachFeature: function(feature, layer) {
+                // Bind a permanent tooltip
+                if (feature.properties && feature.properties.name) {
+                    layer.bindTooltip(feature.properties.name, {
+                    permanent: true,
+                    className: 'no-background',
+                    direction: 'center', // This attempts to center, might need adjustments based on the shape
+                    offset: [0, 0] // Adjust as necessary to better center the tooltip
+                });
+                }
+                // Add click event listener
+                layer.on('click', function() {
+                    OnClickCountry(feature.properties.name);
+                }
+            );
         }
-    }).addTo(map);
+        }).addTo(map);
+    
+    
         colorMap();
         colorBorder();
     });
 
     let countryColors = {}
+    let countryPercentages = {}
 
     var countryCodes = {
     "Austria": "AT",
@@ -239,16 +258,25 @@
 }
 
     function colorMap() {
-        
         if (geojsonLayer) {
+
             for (let key in countryCodes) {
-                countryColors[key] = selectedCountryColorFunc(key)[1];
+                var outp = selectedCountryColorFunc(key);
+                countryPercentages[key] = outp[0];
+                countryColors[key] = outp[1];
             }
 
             geojsonLayer.setStyle(function(feature) {
                 return { 
                     color: countryColors[feature.properties.name]
                 };
+            });
+
+            geojsonLayer.eachLayer(function(layer) {
+                if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
+                    var newName = countryPercentages[layer.feature.properties.name];
+                    layer.setTooltipContent(newName !== "" ? newName + "%" : " ");
+                }
             });
         }
     }
@@ -259,7 +287,7 @@
                 let key = feature.properties.name;
                 return { 
                     color: countryColors[key],
-                    weight: key === selectedCountry ? "5" : 0.5
+                    weight: key === selectedCountry ? 5 : 0.5
                 };
             });
         }
@@ -357,7 +385,7 @@
 
     function countryColorFuncLargestGrowth(country) {
         if (selectedToDate === undefined || selectedFromDate === undefined) {
-            return "white";
+            return ["", "white"];
         }
 
         console.log("test");
@@ -391,13 +419,13 @@
         let largestGrowthEntry = Object.entries(growth).reduce((max, current) => {
             return (max[1] > current[1]) ? max : current;
         })[0]; 
-        
-        return ["", leaning_colors[largestGrowthEntry]]
+
+        return [Math.round(growth[largestGrowthEntry]), leaning_colors[largestGrowthEntry]]
     }
 
     function countryColorFuncLargestDecline(country) {
         if (selectedToDate === undefined || selectedFromDate === undefined) {
-            return "white";
+            return ["", "white"];
         }
 
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
@@ -431,7 +459,7 @@
         })[0]; 
         
 
-        return ["", leaning_colors[largestDeclinerEntry]]
+        return [Math.round(growth[largestDeclinerEntry]), leaning_colors[largestDeclinerEntry]]
     }
 
     function OnHoverCountry(countryCode) {
