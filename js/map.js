@@ -20,6 +20,7 @@ let europeProjection;
 let pathGenerator;
 
 function colorMap(htmlId, colorFunc, showGrowthGradient = false) {
+    return;
     let svg = d3.select(htmlId).select("svg");  // Select the existing SVG by HTML ID
 
     var colorFuncOutputs = {}
@@ -115,6 +116,7 @@ function colorMap(htmlId, colorFunc, showGrowthGradient = false) {
 }
 
 function AppendMap(htmlId, onHoverCountryFunc, onClickCountryFunc, colorFunc = undefined, width = 900, height = 500) {
+    return;
     let svg = d3.select(htmlId).append("svg")
     .attr("width", width)
     .attr("height", height)

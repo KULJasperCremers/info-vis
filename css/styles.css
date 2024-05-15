@@ -57,3 +57,5 @@
         border-radius: 100%; /* Makes the handle circular */
         cursor: pointer; /* Changes cursor to a pointer when hovering over the handles */
     }
+
+    #map { height: 44.1rem; }
