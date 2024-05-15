@@ -17,12 +17,12 @@
 </head>
 <body>
         <div class="row">
-            <div class="col chart" style="margin-right: -37;">
-                <h1 class="text-center" id="countryHeader">Country</h1>
+            <div class="col" style="margin-right: -37;">
+                <div class="row chart"><h1  class="text-center" id="countryHeader">Country</h1></div>
                 <div id="graph"></div>
             </div>
-            <div class="col-1 chart" style="margin-right: -50;">
-                <div  style="margin-top: 120%;">
+            <div class="col-1" style="margin-right: -50;">
+                <div  class="chart2" style="margin-top: 110%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color: #a6cee3;" onclick="selectLeaning(this, 'Far Left')">
@@ -67,7 +67,7 @@
                         </label>
                     </div>
                 </div>
-                <div  style="margin-top: 30%;">
+                <div class="chart2" style="margin-top: 10%;">
                     <p><strong>Survey</strong></p>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="radio-survey" id="radio-happy" style="background-color:#FFCC0D;" onclick="selectSurvey(this, 'happy')" checked>
@@ -88,7 +88,7 @@
                         </label>
                     </div>
                 </div>
-                <div  style="margin-top: 30%;">
+                <div  class="chart2" style="margin-top: 10%;">
                     <p><strong>Map</strong></p>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-growth" style="background-color:#FFCC0D;" onclick="selectMapMode(this, 'largest-growth')" checked>
@@ -209,10 +209,12 @@
         }
 
         d3.select(graphContainer)
-            .append("h1")
-            .attr("id", "countryHeader")
-            .style("text-align", "center")
-            .text(selectedCountry);
+        .append("div")
+        .attr("class", "row chart")
+        .append("h1")
+        .attr("id", "countryHeader")
+        .attr("class", "text-center")
+        .text(selectedCountry);
         
         // Create a new 'graph' element
         var svg = d3.select(graphContainer)
@@ -502,7 +504,7 @@
 
     // Get the width and height of the graphContainer
     var width = graphContainer.clientWidth;
-    var height = graphContainer.clientHeight;
+    var height = graphContainer.clientHeight - 110;
 
     // Create an SVG in the graphContainer
     svg = d3.select(graphContainer)
@@ -578,7 +580,7 @@
         .datum(values)
         .attr("fill", "none")
         .attr("stroke", color(key))
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 4)
         .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
         .attr("d", line)
         .on("mouseover", function() {
@@ -688,7 +690,7 @@
 
         // Get the width and height of the graphContainer
         var width = graphContainer.clientWidth;
-        var height = graphContainer.clientHeight;
+        var height = graphContainer.clientHeight - 210;
 
         // Create an SVG in the graphContainer
         svg = d3.select(graphContainer)
@@ -768,7 +770,7 @@
         .datum(values)
         .attr("fill", "none")
         .attr("stroke", color(key))
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 4)
         .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
         .attr("d", line)
         .on("mouseover", function() {
