@@ -217,14 +217,16 @@
             geojsonLayer = L.geoJSON(geodata, {
                 onEachFeature: function(feature, layer) {
                 // Bind a permanent tooltip
+
                 if (feature.properties && feature.properties.name) {
-                    layer.bindTooltip(feature.properties.name, {
-                    permanent: true,
-                    className: 'no-background',
-                    direction: 'center', // This attempts to center, might need adjustments based on the shape
-                    offset: [0, 0] // Adjust as necessary to better center the tooltip
-                });
+                        layer.bindTooltip(feature.properties.name, {
+                        permanent: true,
+                        className: 'no-background',
+                        direction: 'center', // This attempts to center, might need adjustments based on the shape
+                        offset: [0, 0] // Adjust as necessary to better center the tooltip
+                    });
                 }
+
                 // Add click event listener
                 layer.on('click', function() {
                     OnClickCountry(feature.properties.name);
@@ -239,6 +241,7 @@
     });
 
     let countryColors = {}
+    let countryLargest = {}
     let countryPercentages = {}
 
     var countryCodes = {
@@ -257,19 +260,29 @@
     "Sweden": "SE",
 }
 
-    function colorMap() {
+    function colorMap(leaning = undefined) {
         if (geojsonLayer) {
 
             for (let key in countryCodes) {
                 var outp = selectedCountryColorFunc(key);
                 countryPercentages[key] = outp[0];
                 countryColors[key] = outp[1];
+                countryLargest[key] = outp[2];
             }
 
             geojsonLayer.setStyle(function(feature) {
-                return { 
-                    color: countryColors[feature.properties.name]
-                };
+                console.log(leaning);
+                console.log(countryLargest[feature.properties.name]);
+                if (leaning === undefined) {
+                    return { 
+                        color: countryColors[feature.properties.name]
+                    };
+                }
+                else {
+                    return { 
+                        color: countryLargest[feature.properties.name] === leaning ? countryColors[feature.properties.name] : "white"
+                    };
+                }
             });
 
             geojsonLayer.eachLayer(function(layer) {
@@ -380,7 +393,7 @@
         });
         var growth = (aggregateLast - aggregateFirst)
         var normalized_growth = (growth + 100) / 200;
-        return [Math.round(growth) + "%", interpolateRedGreen(normalized_growth)]
+        return [Math.round(growth), interpolateRedGreen(normalized_growth),, ""]
     }
 
     function countryColorFuncLargestGrowth(country) {
@@ -420,7 +433,7 @@
             return (max[1] > current[1]) ? max : current;
         })[0]; 
 
-        return [Math.round(growth[largestGrowthEntry]), leaning_colors[largestGrowthEntry]]
+        return [Math.round(growth[largestGrowthEntry]), leaning_colors[largestGrowthEntry], largestGrowthEntry]
     }
 
     function countryColorFuncLargestDecline(country) {
@@ -459,7 +472,7 @@
         })[0]; 
         
 
-        return [Math.round(growth[largestDeclinerEntry]), leaning_colors[largestDeclinerEntry]]
+        return [Math.round(growth[largestDeclinerEntry]), leaning_colors[largestDeclinerEntry], largestDeclinerEntry]
     }
 
     function OnHoverCountry(countryCode) {
@@ -695,10 +708,12 @@
         .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
         .attr("d", line)
         .on("mouseover", function() {
+            colorMap(key);
             d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
             d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
         })
         .on("mouseout", function() {
+            colorMap();
             d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
         });
     });
@@ -892,10 +907,12 @@
         .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
         .attr("d", line)
         .on("mouseover", function() {
+            colorMap(key);
             d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
             d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
         })
         .on("mouseout", function() {
+            colorMap();
             d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
         });
     });
