@@ -28,7 +28,7 @@
                 <div class="row chart"><h1  class="text-center" id="countryHeader">Country</h1></div>
                 <div id="graph"></div>
             </div>
-            <div class="col-1" style="margin-right: -50;">
+            <div class="col-1" style="margin-right: -50;" id="radio-leanings">
                 <div  class="chart2" style="margin-top: 110%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
@@ -240,9 +240,24 @@
                 layer.on('mouseover', function() {
                     d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
                     d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+
+                    var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+                    checkboxes.forEach(element => {
+                        if (element.id !== "radio-" + countryLargest[feature.properties.name]) {
+                            element.disabled = true;
+                        }
+                    });
+
                 });
                 layer.on('mouseout', function() {
                     d3.selectAll(".line").style("opacity", 1);
+
+                    var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+                    checkboxes.forEach(element => {
+                            element.disabled = false;
+                    });
                 });
         }
         }).addTo(map);
@@ -783,10 +798,24 @@
             colorMap(key);
             d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
             d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+
+            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+                    checkboxes.forEach(element => {
+                        if (element.id !== "radio-" + key) {
+                            element.disabled = true;
+                        }
+                    });
         })
         .on("mouseout", function() {
             colorMap();
             d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
+
+            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+            checkboxes.forEach(element => {
+                    element.disabled = false;
+            });
         });
     });
 
@@ -982,10 +1011,24 @@
             colorMap(key);
             d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
             d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+
+            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+                    checkboxes.forEach(element => {
+                        if (element.id !== "radio-" + key) {
+                            element.disabled = true;
+                        }
+                    });
         })
         .on("mouseout", function() {
             colorMap();
             d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
+
+            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+
+            checkboxes.forEach(element => {
+                    element.disabled = false;
+            });
         });
     });
 
