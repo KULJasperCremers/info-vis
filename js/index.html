@@ -172,6 +172,10 @@
         "far-right": "#fdbf6f"
     }
 
+    let countryColors = {}
+    let countryLargest = {}
+    let countryPercentages = {}
+
     //d3.json("../json/allCountryData.json").then(function(d) {
     d3.json("../json/allCountryData.json").then(function(d) {
         data = d;
@@ -231,7 +235,15 @@
                 layer.on('click', function() {
                     OnClickCountry(feature.properties.name);
                 }
-            );
+                
+                );
+                layer.on('mouseover', function() {
+                    d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
+                    d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+                });
+                layer.on('mouseout', function() {
+                    d3.selectAll(".line").style("opacity", 1);
+                });
         }
         }).addTo(map);
     
@@ -240,9 +252,7 @@
         colorBorder();
     });
 
-    let countryColors = {}
-    let countryLargest = {}
-    let countryPercentages = {}
+
 
     var countryCodes = {
     "Austria": "AT",
