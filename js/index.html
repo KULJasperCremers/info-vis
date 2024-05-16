@@ -593,6 +593,16 @@
             // Determine which handle is closer to the clicked value
             var handleIndex = Math.abs(nearestYear - values[0]) < Math.abs(nearestYear - values[1]) ? 0 : 1;
 
+            // Check if the nearestYear is already occupied by the other handle
+            if (nearestYear == values[(handleIndex + 1) % 2]) {
+                // Find the second nearest year
+                var secondNearestYear = years.sort(function(a, b) {
+                    return Math.abs(a - newValue) - Math.abs(b - newValue);
+                })[1];
+
+                nearestYear = secondNearestYear;
+            }
+
             // Create a new array for the handle positions
             var newValues = handleIndex === 0 ? [nearestYear, values[1]] : [values[0], nearestYear];
 
