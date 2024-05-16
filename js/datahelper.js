@@ -52,7 +52,7 @@ function aggregateDashboardDataForAllCountries(data) {
     }
 
     // Create a blob from the JSON string
-   /* var blob = new Blob([JSON.stringify(allCountryData, null, 2)], {type: "application/json"});
+    var blob = new Blob([JSON.stringify(allCountryData, null, 2)], {type: "application/json"});
     // Create a URL for the blob
     var url = URL.createObjectURL(blob);
 
@@ -61,7 +61,7 @@ function aggregateDashboardDataForAllCountries(data) {
     link.href = url;
     link.download = 'allCountryData.json';
     link.click();
-*/
+
     return allCountryData;
 }
 
@@ -125,10 +125,12 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
     
     var surveyData = {};
     var yearData = countryData[dataTypes.survey];
+    var surveyMeans = {};
 
     // Initialize surveyData for each year before the loop
     for (year of surveyYears) {
         surveyData[year] = {};
+        surveyMeans[year] = {};
     }
 
     var prevYearMeans = { happy: 0, satisfaction: 0, trust_country: 0, trust_eu: 0 };
@@ -158,6 +160,12 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
                 var values = surveyData[year][leaning][column];
                 var mean = values.reduce((a, b) => a + b, 0) / values.length;
     
+                // Store mean values in surveyMeans
+                if (!surveyMeans[year][leaning]) {
+                    surveyMeans[year][leaning] = {};
+                }
+                surveyMeans[year][leaning][column] = mean;
+
                 // Calculate growth from the second year onwards
                 if (prevYearMeans[column] !== 0) {
                     var growth = mean - prevYearMeans[column];
@@ -185,7 +193,8 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
     return {
         electionGrowth: electionGrowth,
         surveyGrowth: surveyGrowth,
-        percentagesLeaning: aggregatedElectionDataPerYearAndLeaning
+        percentagesLeaning: aggregatedElectionDataPerYearAndLeaning,
+        surveyMeans: surveyMeans
     };
 }
 
