@@ -271,8 +271,6 @@
             }
 
             geojsonLayer.setStyle(function(feature) {
-                console.log(leaning);
-                console.log(countryLargest[feature.properties.name]);
                 if (leaning === undefined) {
                     return { 
                         color: countryColors[feature.properties.name]
@@ -317,7 +315,9 @@
             selectedLeanings.push(leaning);
         }
 
-        colorMap(selectedCountryColorFunc);
+        console.log(selectedLeanings);
+
+        colorMap();
         drawGraphs();
     }
 
@@ -400,8 +400,6 @@
         if (selectedToDate === undefined || selectedFromDate === undefined) {
             return ["", "white"];
         }
-
-        console.log("test");
 
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
@@ -499,8 +497,6 @@
         selectedToDate = dates.at(-1);
 
         let years = [...new Set(dates.map(date => new Date(date).getFullYear()))];
-
-        console.log(dates.map(Number));
 
         var slider = document.getElementById('slider');
 
@@ -607,20 +603,13 @@
             var valueLower = document.getElementById('slider-value-lower');
             var valueUpper = document.getElementById('slider-value-upper');
 
-
-            console.log(`values: ${Math.round(values[1])}`)
-
             valueLower.innerHTML = Math.round(values[0]);
-
             valueUpper.innerHTML = Math.round(values[1]);
 
 
             var newFromDate = Math.round(values[0]).toString();
-            console.log(`newFromDate: ${newFromDate}`)
             var newToDate = Math.round(values[1]).toString();
-            console.log(`newToDate: ${newToDate}`)
 
-            console.log(`selectedFromDate: ${selectedFromDate}`)
 
             if (newFromDate != selectedFromDate || newToDate != selectedToDate) {
                 colorMap();
@@ -1008,7 +997,6 @@
             
             if (selectedMapMode === "largest-growth") {
                 selectedCountryColorFunc= countryColorFuncLargestGrowth;
-                console.log("largest growth");
             }
             else if (selectedMapMode === "largest-decline") {
                 selectedCountryColorFunc= countryColorFuncLargestDecline; 
