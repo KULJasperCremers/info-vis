@@ -486,6 +486,10 @@
 
     let dates;
 
+    function timestamp(str) {
+        return new Date(str).getFullYear();
+    }
+
     function selectCountry(country) {
         selectedCountry = country;
         document.getElementById("countryHeader").innerText = country;
@@ -494,7 +498,7 @@
         selectedFromDate = dates.at(0);
         selectedToDate = dates.at(-1);
 
-
+        let years = [...new Set(dates.map(date => new Date(date).getFullYear()))];
 
         console.log(dates.map(Number));
 
@@ -503,33 +507,93 @@
         if (!slider.noUiSlider) {
             noUiSlider.create(slider, {
                 margin: 2,
-                start: [0, dates.length], // Initial values: [lower, upper]
+                start: [timestamp(dates.at(0)), timestamp(dates.at(-1))],
                 connect: true, // Display a colored bar between the handles
                 range: {
-                    'min': 0,
-                    'max': dates.length
+                    'min': timestamp(dates.at(0)),
+                    'max': timestamp(dates.at(-1))
                 },
                 pips: {
                     mode: 'values',
-                    values: [0, 1, 2, 3, 4, 5],
-                    density: dates.length
+                    values: years, // Use the years array for the pips
+                    density: dates.length,
+                    snap: true  // Make the handle snap to the pips
                 }
             });
 
             attachSliderUpdateListener(slider, dates);
+
+            var pips = slider.querySelectorAll('.noUi-value');
+
+            function clickOnPip() {
+                var value = Number(this.getAttribute('data-value'));
+                var values = slider.noUiSlider.get();
+            
+                // Convert the current values to numbers
+                var valueLower = Number(values[0]);
+                var valueUpper = Number(values[1]);
+            
+                // Determine which handle is closer to the clicked value
+                var handleIndex = Math.abs(value - valueLower) < Math.abs(value - valueUpper) ? 0 : 1;
+            
+                // Create a new array for the handle positions
+                var newValues = handleIndex === 0 ? [value, valueUpper] : [valueLower, value];
+            
+                // Set the new handle positions
+                slider.noUiSlider.set(newValues);
+            }
+            
+            for (var i = 0; i < pips.length; i++) {
+        
+                // For this example. Do this in CSS!
+                pips[i].style.cursor = 'pointer';
+                pips[i].addEventListener('click', clickOnPip);
+            }
+
+        // Add a click event listener to the slider
+        slider.addEventListener('click', function(event) {
+            // Get the clicked position
+            var rect = slider.getBoundingClientRect();
+            var x = event.clientX - rect.left; // x position within the element
+            var width = rect.right - rect.left; // width of the element
+            var percentage = x / width; // percentage of the clicked position in the element
+
+            // Calculate the new value based on the clicked position
+            var newValue = slider.noUiSlider.options.range.min + (slider.noUiSlider.options.range.max - slider.noUiSlider.options.range.min) * percentage;
+
+            // Find the nearest allowed year
+            var nearestYear = years.reduce(function(prev, curr) {
+                return (Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev);
+            });
+
+            // Get the current values
+            var values = slider.noUiSlider.get();
+
+            // Determine which handle is closer to the clicked value
+            var handleIndex = Math.abs(nearestYear - values[0]) < Math.abs(nearestYear - values[1]) ? 0 : 1;
+
+            // Create a new array for the handle positions
+            var newValues = handleIndex === 0 ? [nearestYear, values[1]] : [values[0], nearestYear];
+
+            // Set the slider handle to the nearest allowed year
+            slider.noUiSlider.set(newValues);
+        });
+        
+
         } else {
             slider.noUiSlider.updateOptions({
-                start: [0, dates.length], // Initial values: [lower, upper]
+                start: [timestamp(dates.at(0)), timestamp(dates.at(-1))],
                 margin: 2,
                 connect: true, // Display a colored bar between the handles
                 range: {
-                    'min': 0,
-                    'max': dates.length
+                    'min': timestamp(dates.at(0)),
+                    'max': timestamp(dates.at(-1))
                 },
                 pips: {
                     mode: 'values',
-                    values: dates.map(Number),
-                    density: dates.length
+                    values: years, // Use the years array for the pips
+                    density: dates.length,
+                    snap: true  // Make the handle snap to the pips
                 }
             }, true); // Reset existing options without adding new event listeners
         }
@@ -543,13 +607,22 @@
             var valueLower = document.getElementById('slider-value-lower');
             var valueUpper = document.getElementById('slider-value-upper');
 
-            valueLower.innerHTML = dates[Math.round(values[0])];
-            valueUpper.innerHTML = dates[Math.round(values[1] - 1)];
 
-            var newFromDate = dates[Math.round(values[0])];
-            var newToDate = dates[Math.round(values[1] - 1)];
+            console.log(`values: ${Math.round(values[1])}`)
 
-            if (newFromDate !== selectedFromDate || newToDate !== selectedToDate) {
+            valueLower.innerHTML = Math.round(values[0]);
+
+            valueUpper.innerHTML = Math.round(values[1]);
+
+
+            var newFromDate = Math.round(values[0]).toString();
+            console.log(`newFromDate: ${newFromDate}`)
+            var newToDate = Math.round(values[1]).toString();
+            console.log(`newToDate: ${newToDate}`)
+
+            console.log(`selectedFromDate: ${selectedFromDate}`)
+
+            if (newFromDate != selectedFromDate || newToDate != selectedToDate) {
                 colorMap();
                 drawGraphs();
 
