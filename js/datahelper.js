@@ -39,33 +39,60 @@ var dataTypes = {
     "survey": "ess_data"
 }
 
-function aggregateDashboardDataForAllCountries(data) {
-    var allCountryData = {};
+function aggregateSurveyMeansForAllCountries(data) {
+    var surveyMeans = {};
+
+    for (var country in newCountryCodes) {
+        var countryData = data[newCountryCodes[country]];
+        var allSurveyYears = Object.keys(countryData[dataTypes.survey]).map(Number);
+        var earliestYear = Math.min(...allSurveyYears);
+        console.log(`earliest year: ${earliestYear}`)
+        var latestYear = Math.max(...allSurveyYears);
+        surveyMeans[newCountryCodes[country]] = calculateSurveyMeans(countryData, earliestYear, latestYear);
+    }
+
+        // Create a blob from the JSON string
+        var blob = new Blob([JSON.stringify(surveyMeans, null, 2)], {type: "application/json"});
+        // Create a URL for the blob
+        var url = URL.createObjectURL(blob);
+
+        // Create a hidden link and trigger a click on it to start the download
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'surveyMeans.json';
+        link.click();
+
+        return surveyMeans;
+    
+}
+
+function aggregateElectionDataForAllCountries(data) { 
+    var electionData = {};
 
     for (var country in newCountryCodes) {
         var countryData = data[newCountryCodes[country]];
         var allElectionYears = Object.keys(countryData[dataTypes.election]).map(Number);
         var earliestYear = Math.min(...allElectionYears);
         var latestYear = Math.max(...allElectionYears);
-        var countryData = data[newCountryCodes[country]];
-        allCountryData[newCountryCodes[country]] = aggregateDashboardDataForCountryBetweenYears(countryData, earliestYear, latestYear);
+        electionData[newCountryCodes[country]] = calculatePercentagesLeaning(countryData, earliestYear, latestYear);
     }
 
     // Create a blob from the JSON string
-    var blob = new Blob([JSON.stringify(allCountryData, null, 2)], {type: "application/json"});
+    var blob = new Blob([JSON.stringify(electionData, null, 2)], {type: "application/json"});
     // Create a URL for the blob
     var url = URL.createObjectURL(blob);
 
     // Create a hidden link and trigger a click on it to start the download
     var link = document.createElement('a');
     link.href = url;
-    link.download = 'allCountryData.json';
+    link.download = 'electionData.json';
     link.click();
 
-    return allCountryData;
+    return electionData;
+
 }
 
-function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
+function calculatePercentagesLeaning(countryData, year1, year2) {
     var allElectionYears = Object.keys(countryData[dataTypes.election]).map(Number);
     var electionYears = allElectionYears.filter(year => year >= year1 && year <= year2);
 
@@ -91,35 +118,10 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
         aggregatedElectionDataPerYearAndLeaning[year] = leaningTotals;
     }
 
-    //console.log(aggregatedElectionDataPerYearAndLeaning)
+    return aggregatedElectionDataPerYearAndLeaning;
+}
 
-    // Second pass to calculate normalized growth and relative growth
-    var electionGrowth = {};
-    for (var i = 1; i < electionYears.length; i++) {
-        var year = electionYears[i];
-        var yearData = aggregatedElectionDataPerYearAndLeaning[year];
-        var previousYearData = aggregatedElectionDataPerYearAndLeaning[electionYears[i - 1]];
-        for (var leaning in yearData) {
-            var growth = (yearData[leaning] - previousYearData[leaning]);
-            var relativeGrowth;
-            if (previousYearData[leaning] !== 0) {
-                relativeGrowth = ((yearData[leaning] - previousYearData[leaning]) / previousYearData[leaning]) * 100;
-            } else {
-                relativeGrowth = growth;
-            }
-            if (!electionGrowth[year]) {
-                electionGrowth[year] = {};
-            }
-            if (!electionGrowth[year][leaning]) {
-                electionGrowth[year][leaning] = {};
-            }
-            electionGrowth[year][leaning] = {
-                absolute: growth,
-                relative: relativeGrowth
-            };
-        }
-    }
-
+function calculateSurveyMeans(countryData, year1, year2) {
     var allSurveyYears = Object.keys(countryData[dataTypes.survey]).map(Number);
     var surveyYears = allSurveyYears.filter(year => year >= year1 && year <= year2);
     
@@ -128,13 +130,9 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
     var surveyMeans = {};
 
     // Initialize surveyData for each year before the loop
-    for (year of surveyYears) {
+    for (var year of surveyYears) {
         surveyData[year] = {};
-        surveyMeans[year] = {};
     }
-
-    var prevYearMeans = { happy: 0, satisfaction: 0, trust_country: 0, trust_eu: 0 };
-    var surveyGrowth = {};
     
     for (year of surveyYears) {
         for (var i = 0; i < yearData[year].leaning.length; i++) {
@@ -155,52 +153,34 @@ function aggregateDashboardDataForCountryBetweenYears(countryData,year1,year2) {
             surveyData[year][leaning].trust_country.push(yearData[year].trust_country[i]);
             surveyData[year][leaning].trust_eu.push(yearData[year].trust_eu[i]);
     
-            // Calculate mean and growth for each category
+            // Calculate mean for each category
             for (var column in surveyData[year][leaning]) {
                 var values = surveyData[year][leaning][column];
                 var mean = values.reduce((a, b) => a + b, 0) / values.length;
-    
-                // Store mean values in surveyMeans
+
+                // Check if surveyMeans[year] exists, if not, create it
+                if (!surveyMeans[year]) {
+                    surveyMeans[year] = {};
+                }
+
+                // Check if surveyMeans[year][leaning] exists, if not, create it
                 if (!surveyMeans[year][leaning]) {
                     surveyMeans[year][leaning] = {};
                 }
-                surveyMeans[year][leaning][column] = mean;
 
-                // Calculate growth from the second year onwards
-                if (prevYearMeans[column] !== 0) {
-                    var growth = mean - prevYearMeans[column];
-                    var relativeGrowth = ((mean - prevYearMeans[column]) / prevYearMeans[column]) * 100;
-                    if (!surveyGrowth[year]) {
-                        surveyGrowth[year] = {};
-                    }
-                    if (!surveyGrowth[year][leaning]) {
-                        surveyGrowth[year][leaning] = {};
-                    }
-                    if (!surveyGrowth[year][leaning][column]) {
-                        surveyGrowth[year][leaning][column] = {};
-                    }
-                    surveyGrowth[year][leaning][column] = {
-                        absolute: growth,
-                        relative: relativeGrowth
-                    };
-                }
-    
-                prevYearMeans[column] = mean;
+                // Now you can safely assign the mean value
+                surveyMeans[year][leaning][column] = mean;
             }
         }
     }
 
-    return {
-        electionGrowth: electionGrowth,
-        surveyGrowth: surveyGrowth,
-        percentagesLeaning: aggregatedElectionDataPerYearAndLeaning,
-        surveyMeans: surveyMeans
-    };
+    return surveyMeans;
 }
+
 
 function get_percentage_leaning_data_between(data, country, from, to) {
 
-    var countryData = data[country]["percentagesLeaning"];
+    var countryData = data[country];
 
     var newData = Object.keys(countryData)
         .filter(key => parseInt(key) >= from && parseInt(key) <= to)
@@ -213,5 +193,5 @@ function get_percentage_leaning_data_between(data, country, from, to) {
 }
 
 function get_all_dates(data, country) {
-    return Object.keys(data[country]["percentagesLeaning"]);
+    return Object.keys(data[country]);
 }

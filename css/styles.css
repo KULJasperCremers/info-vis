@@ -65,6 +65,6 @@
         border: none;                 /* No borders */
         box-shadow: none;             /* No shadow */
         color: black;                 /* Text color */
-        font-weight: 900;
-        font-size: 12px;              /* Smaller text size */
+        font-weight: 1000;
+        font-size: 18px;              /* Smaller text size */
     }

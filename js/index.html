@@ -128,7 +128,9 @@
                 <h1 class="text-center">Date Selection</h1>
                 <div class="row">
                     <p>Between <span id="slider-value-lower"></span> and <span id="slider-value-upper"></span></p>
-                    <div id="slider" style="margin-bottom: 3rem; margin-left: 1rem; margin-right: 1rem;"></div>
+                    <div style="margin-bottom: 3rem; margin-left: 1rem; margin-right: 1rem;">
+                        <div id="slider"></div>
+                    </div>
                 </div>
             </div>
             <div class="row chart">
@@ -138,13 +140,16 @@
         </div>
 
 <script src="datahelper.js"></script>
-<script src="map.js"></script>
+<script src="graphs.js"></script>
+<script src="slider.js"></script>
 <script>
 
     let data;
     let all_dates = [];
-    
 
+    let surveyData;
+    let allSurveyDates = [];
+    
     let map;
     let geodata;
     let geojsonLayer ;
@@ -162,6 +167,9 @@
 
     var selectedLeanings = [];
 
+    var radios = document.querySelectorAll('#radio-happy, #radio-satisfaction, #radio-trust-country, #radio-trust-eu');
+    var previousSelection;
+
     var leaning_colors = {
         "far-left": "#a6cee3",
         "left": "#1f78b4",
@@ -173,24 +181,36 @@
     }
 
     let countryColors = {}
-    let countryLargest = {}
+    let countryLargest = {} 
     let countryPercentages = {}
 
-    //d3.json("../json/allCountryData.json").then(function(d) {
-    d3.json("../json/allCountryData.json").then(function(d) {
-        data = d;
-        
+    /*d3.json("../json/ess_data_all.json").then(function(d) {
+        aggregateSurveyMeansForAllCountries(d);
+        aggregateElectionDataForAllCountries(d);
+    })*/
+    Promise.all([
+        d3.json("../json/surveyMeans.json"),
+        d3.json("../json/electionData.json"),
+        d3.json("../json/geojson.json")
+    ]).then(function(files) {
+        surveyData = files[0];
+        data = files[1];
+        geodata = files[2];
+
         Object.values(newCountryCodes).forEach(element => {
+            var surveyDates = get_all_dates(surveyData, element);
             var dates = get_all_dates(data, element);
+            allSurveyDates.push(...surveyDates);
             all_dates.push(...dates); 
         });
 
+        allSurveyDates = [...new Set(allSurveyDates)];
+        allSurveyDates.sort((a, b) => a - b);
         all_dates = [...new Set(all_dates)];
         all_dates.sort((a, b) => a - b);
 
         selectCountry("Belgium");
 
-        
         document.getElementById("radio-far-left").checked = false;
         document.getElementById("radio-left").checked = false;
         document.getElementById("radio-center-left").checked = false;
@@ -203,87 +223,92 @@
             document.getElementById("radio-far-right"),
             'Far Right'
         )
-        return d3.json("../json/geojson.json");
-    }).then(function(d) {
-            geodata = d;
-            map = L.map('map', { 
-                zoomControl: false,
-                scrollWheelZoom: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false,
-                boxZoom: false
-            }).setView([56, 10], 4); // Centered around Europe
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(map);
-            geojsonLayer = L.geoJSON(geodata, {
-                onEachFeature: function(feature, layer) {
-                // Bind a permanent tooltip
+
+
+        previousSelection = document.getElementById("radio-happy");
+        previousSelection.checked = true
+
+        map = L.map('map', { 
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            touchZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false
+        }).setView([56, 10], 4);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        geojsonLayer = L.geoJSON(geodata, {
+            onEachFeature: function(feature, layer) {
 
                 if (feature.properties && feature.properties.name) {
-                        layer.bindTooltip(feature.properties.name, {
-                        permanent: true,
-                        className: 'no-background',
-                        direction: 'center', // This attempts to center, might need adjustments based on the shape
-                        offset: [0, 0] // Adjust as necessary to better center the tooltip
-                    });
-                }
-
-                // Add click event listener
-                layer.on('click', function() {
-                    OnClickCountry(feature.properties.name);
-                }
-                
-                );
-                layer.on('mouseover', function() {
-                    d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
-                    d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
-
-                    var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-
-                    checkboxes.forEach(element => {
-                        if (element.id !== "radio-" + countryLargest[feature.properties.name]) {
-                            element.disabled = true;
-                        }
-                    });
-
+                    layer.bindTooltip(feature.properties.name, {
+                    permanent: true,
+                    className: 'no-background',
+                    direction: 'center',
+                    offset: [0, 0] 
                 });
-                layer.on('mouseout', function() {
-                    d3.selectAll(".line").style("opacity", 1);
+            }
 
-                    var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+            layer.on('click', function() {
+                OnClickCountry(feature.properties.name);
+            });
+            layer.on('mouseover', function() {
+                d3.selectAll(".line").style("opacity", 0.1);
+                d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
 
-                    checkboxes.forEach(element => {
-                            element.disabled = false;
-                    });
+                var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+                checkboxes.forEach(element => {
+                    if (element.id !== "radio-" + countryLargest[feature.properties.name]) {
+                        element.disabled = true;
+                    }
                 });
-        }
-        }).addTo(map);
-    
-    
+                // bar chart switch!!
+                displayGraphs(true, countryLargest[feature.properties.name])
+                radios.forEach((radio) => {
+                    if (radio.checked) {
+                        previousSelection = radio;
+                        radio.checked = false;
+                    }
+                });
+            });
+            layer.on('mouseout', function() {
+                d3.selectAll(".line").style("opacity", 1);
+
+                var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+                checkboxes.forEach(element => {
+                        element.disabled = false;
+                });
+                // bar chart switch!!
+                displayGraphs()
+                if (previousSelection) {
+                    previousSelection.checked = true;
+                }
+            });
+        }}).addTo(map);
+
         colorMap();
         colorBorder();
+
     });
 
-
-
     var countryCodes = {
-    "Austria": "AT",
-    "Belgium": "BE",
-    "Germany": "DE",
-    "Denmark": "DK",
-    "Greece": "EL",
-    "Spain": "ES",
-    "Finland": "FI",
-    "France": "FR",
-    "Ireland": "IE",
-    "Italy": "IT",
-    "Netherlands": "NL",
-    "Portugal": "PT",
-    "Sweden": "SE",
-}
+        "Austria": "AT",
+        "Belgium": "BE",
+        "Germany": "DE",
+        "Denmark": "DK",
+        "Greece": "EL",
+        "Spain": "ES",
+        "Finland": "FI",
+        "France": "FR",
+        "Ireland": "IE",
+        "Italy": "IT",
+        "Netherlands": "NL",
+        "Portugal": "PT",
+        "Sweden": "SE",
+    }
 
     function colorMap(leaning = undefined) {
         if (geojsonLayer) {
@@ -332,47 +357,48 @@
 
     function selectLeaning(checkbox, leaning) {
         if (!checkbox.checked) {
-            // If the leaning is already in the array, remove it
             const index = selectedLeanings.indexOf(leaning);
             selectedLeanings.splice(index, 1);
         } else {
-            // Otherwise, add the leaning to the array
             selectedLeanings.push(leaning);
         }
 
         console.log(selectedLeanings);
 
         colorMap();
-        drawGraphs();
+        displayGraphs();
     }
 
-    function drawGraphs() {
-        // Get the parent container
+    function displayGraphs(barChart=false, leaning=null) {
         var graphContainer = document.getElementById('graph').parentNode;
-            
-        // Remove all child elements of the graphContainer
-        while (graphContainer.firstChild) {
-            graphContainer.removeChild(graphContainer.firstChild);
-        }
-
-        d3.select(graphContainer)
-        .append("div")
-        .attr("class", "row chart")
-        .append("h1")
-        .attr("id", "countryHeader")
-        .attr("class", "text-center")
-        .text(selectedCountry);
-        
-        // Create a new 'graph' element
-        var svg = d3.select(graphContainer)
+        if (barChart) {
+            d3.select("#surveyGraph").remove();
+            var svgBarChart = d3.select(graphContainer)
+                .append("div")
+                .attr("id", "barChart");
+    
+            displayBarGraphSurvey(selectedCountry, selectedFromDate, selectedToDate, svgBarChart, leaning);
+        } else {
+            while (graphContainer.firstChild) {
+                graphContainer.removeChild(graphContainer.firstChild);
+            }
+    
+            d3.select(graphContainer)
             .append("div")
-            .attr("id", "graph");
+            .attr("class", "row chart")
+            .append("h1")
+            .attr("id", "countryHeader")
+            .attr("class", "text-center")
+            .text(selectedCountry);
     
-        // Draw the first graph
-        graph(selectedCountry, selectedFromDate, selectedToDate, svg);
+            var svg = d3.select(graphContainer)
+                .append("div")
+                .attr("id", "graph");
     
-        // Draw the second graph
-        graphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg, selectedSurveyType);
+            displayGraphElection(selectedCountry, selectedFromDate, selectedToDate, svg);
+    
+            displayGraphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg, selectedSurveyType);
+        }
     }
 
     var leaning_mapper = {
@@ -397,7 +423,6 @@
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
-        //leaning = leaning_mapper[selectedLeaning]
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
 
@@ -429,7 +454,6 @@
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
-        //leaning = leaning_mapper[selectedLeaning]
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
 
@@ -467,7 +491,6 @@
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
-        //leaning = leaning_mapper[selectedLeaning]
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
 
@@ -502,7 +525,6 @@
     }
 
     function OnClickCountry(countryCode) {
-        // console.log("click: " + countryCode);
         selectCountry(countryCode)
         colorBorder();
     }
@@ -518,541 +540,30 @@
         document.getElementById("countryHeader").innerText = country;
 
         dates = get_all_dates(data, newCountryCodes[country]);
+        console.log(`dates: ${dates}`)
         selectedFromDate = dates.at(0);
+        console.log(`selectedFromDate: ${selectedFromDate}`)
         selectedToDate = dates.at(-1);
-
+        console.log(`selectedToDate: ${selectedToDate}`)
         let years = [...new Set(dates.map(date => new Date(date).getFullYear()))];
 
         var slider = document.getElementById('slider');
-
-        if (!slider.noUiSlider) {
-            noUiSlider.create(slider, {
-                margin: 2,
-                start: [timestamp(dates.at(0)), timestamp(dates.at(-1))],
-                connect: true, // Display a colored bar between the handles
-                range: {
-                    'min': timestamp(dates.at(0)),
-                    'max': timestamp(dates.at(-1))
-                },
-                pips: {
-                    mode: 'values',
-                    values: years, // Use the years array for the pips
-                    density: dates.length,
-                    snap: true  // Make the handle snap to the pips
-                }
-            });
-
-            attachSliderUpdateListener(slider, dates);
-
-            var pips = slider.querySelectorAll('.noUi-value');
-
-            function clickOnPip() {
-                var value = Number(this.getAttribute('data-value'));
-                var values = slider.noUiSlider.get();
-            
-                // Convert the current values to numbers
-                var valueLower = Number(values[0]);
-                var valueUpper = Number(values[1]);
-            
-                // Determine which handle is closer to the clicked value
-                var handleIndex = Math.abs(value - valueLower) < Math.abs(value - valueUpper) ? 0 : 1;
-            
-                // Create a new array for the handle positions
-                var newValues = handleIndex === 0 ? [value, valueUpper] : [valueLower, value];
-            
-                // Set the new handle positions
-                slider.noUiSlider.set(newValues);
-            }
-            
-            for (var i = 0; i < pips.length; i++) {
-        
-                // For this example. Do this in CSS!
-                pips[i].style.cursor = 'pointer';
-                pips[i].addEventListener('click', clickOnPip);
-            }
-
-        // Add a click event listener to the slider
-        slider.addEventListener('click', function(event) {
-            // Get the clicked position
-            var rect = slider.getBoundingClientRect();
-            var x = event.clientX - rect.left; // x position within the element
-            var width = rect.right - rect.left; // width of the element
-            var percentage = x / width; // percentage of the clicked position in the element
-
-            // Calculate the new value based on the clicked position
-            var newValue = slider.noUiSlider.options.range.min + (slider.noUiSlider.options.range.max - slider.noUiSlider.options.range.min) * percentage;
-
-            // Find the nearest allowed year
-            var nearestYear = years.reduce(function(prev, curr) {
-                return (Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev);
-            });
-
-            // Get the current values
-            var values = slider.noUiSlider.get();
-
-            // Determine which handle is closer to the clicked value
-            var handleIndex = Math.abs(nearestYear - values[0]) < Math.abs(nearestYear - values[1]) ? 0 : 1;
-
-            // Check if the nearestYear is already occupied by the other handle
-            if (nearestYear == values[(handleIndex + 1) % 2]) {
-                // Find the second nearest year
-                var secondNearestYear = years.sort(function(a, b) {
-                    return Math.abs(a - newValue) - Math.abs(b - newValue);
-                })[1];
-
-                nearestYear = secondNearestYear;
-            }
-
-            // Create a new array for the handle positions
-            var newValues = handleIndex === 0 ? [nearestYear, values[1]] : [values[0], nearestYear];
-
-            // Set the slider handle to the nearest allowed year
-            slider.noUiSlider.set(newValues);
-        });
-        
-
-        } else {
-            slider.noUiSlider.updateOptions({
-                start: [timestamp(dates.at(0)), timestamp(dates.at(-1))],
-                margin: 2,
-                connect: true, // Display a colored bar between the handles
-                range: {
-                    'min': timestamp(dates.at(0)),
-                    'max': timestamp(dates.at(-1))
-                },
-                pips: {
-                    mode: 'values',
-                    values: years, // Use the years array for the pips
-                    density: dates.length,
-                    snap: true  // Make the handle snap to the pips
-                }
-            }, true); // Reset existing options without adding new event listeners
-        }
+        setupSlider(slider, years)
 
         colorMap();
-        drawGraphs();
+        displayGraphs();
     }
-
-    function attachSliderUpdateListener(slider) {
-        slider.noUiSlider.on('update', function (values, handle) {
-            var valueLower = document.getElementById('slider-value-lower');
-            var valueUpper = document.getElementById('slider-value-upper');
-
-            valueLower.innerHTML = Math.round(values[0]);
-            valueUpper.innerHTML = Math.round(values[1]);
-
-
-            var newFromDate = Math.round(values[0]).toString();
-            var newToDate = Math.round(values[1]).toString();
-
-
-            if (newFromDate != selectedFromDate || newToDate != selectedToDate) {
-                colorMap();
-                drawGraphs();
-
-                selectedFromDate = newFromDate;
-                selectedToDate = newToDate;
-            }
-        });
-    }
-
+    
     function interpolateRedGreen(t) {
         if (t < 0 || t > 1) {
             return 'Value must be between 0 and 1';
         }
-
-        // Calculate red and green components
         const red = 255 * (1 - t);
         const green = 255 * t;
-
-        // Convert each component to an integer
         const r = Math.round(red);
         const g = Math.round(green);
-
-        // Return the color in hexadecimal format
         return `rgb(${r}, ${g}, 0)`;
     }
-
-    function graph(country, date1, date2, svg) {
-    var newCountryCodes = {
-        "Austria": "AT",
-        "Belgium": "BE",
-        "Germany": "DE",
-        "Denmark": "DK",
-        "Greece": "EL",
-        "Spain": "ES",
-        "Finland": "FI",
-        "France": "FR",
-        "Ireland": "IE",
-        "Italy": "IT",
-        "Netherlands": "NL",
-        "Portugal": "PT",
-        "Sweden": "SE",
-    }
-
-    var growthData = [];
-    var allYears = [];
-    for (var year in data[newCountryCodes[country]].electionGrowth) {
-        if (year >= date1 && year <= date2) {
-            for (var leaning in data[newCountryCodes[country]].electionGrowth[year]) {
-                var growth = data[newCountryCodes[country]].electionGrowth[year][leaning];
-                growthData.push({
-                    leaning: leaning,
-                    year: year,
-                    growth: growth.cumulative
-                });
-                allYears.push(year);
-            }
-        }
-    }
-
-    // console.log(growthData)
-
-    // Find the min and max growth values
-    var growthMin = d3.min(growthData, function(d) { return d.growth; });
-    var growthMax = d3.max(growthData, function(d) { return d.growth; });
-
-    // Create a scale for your growth data
-    var growthScale = d3.scaleLinear()
-        .domain([growthMin, growthMax])
-        .range([0, 1]);
-
-    // Get the parent container
-    var graphContainer = document.getElementById('graph').parentNode;
-
-    // Remove the old SVG
-    //d3.select("#graph").remove();
-
-    // Get the width and height of the graphContainer
-    var width = graphContainer.clientWidth;
-    var height = graphContainer.clientHeight - 110;
-
-    // Create an SVG in the graphContainer
-    svg = d3.select(graphContainer)
-    .append("svg")
-        .attr("id", "graph")
-        .attr("width", width - 25)
-        .attr("height", height / 1.75);
-
-    // Define margins for the x-axis
-    var xAxisMargin = 50;
-
-    // Create a scale for your x-axis
-    var x = d3.scalePoint()
-    .domain(allYears)
-    .range([xAxisMargin, width - 25 - xAxisMargin]); // Leave space on both sides of the x-axis
-
-    // Create a scale for your y-axis
-    var y = d3.scaleLinear()
-    .domain([0, 1])
-    .range([height / 2 - 20, 25]);
-
-    // Add the y-axis to your SVG
-    svg.append("g")
-    .attr("transform", "translate(" + xAxisMargin + ",0)")
-    .call(d3.axisLeft(y).ticks(5));
-
-    // Add grid lines for each x-axis tick
-    svg.selectAll(".grid-line")
-        .data(x.domain())
-        .enter()
-        .append("line")
-        .attr("class", "grid-line")
-        .attr("stroke", "#ccc") // Change this to the color you want
-        .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
-        .attr("y1", 0)
-        .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
-        .attr("x1", function(d) { return x(d); })
-        .attr("x2", function(d) { return x(d); });
-
-    // Define color scale
-    var color = d3.scaleOrdinal()
-    .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-    .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
-
-    // Define your line
-    var line = d3.line()
-        .x(function(d) { return x(d.year); })
-        .y(function(d) { return y(d.growth); });
-
-    // Group the data by leaning
-    var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
-
-    // Scale the growth data in dataByLeaning
-    dataByLeaning = dataByLeaning.map(([key, values]) => {
-        return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
-    });
-
-    // Filter the data to include only the selected leanings
-    var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
-        for (var l in selectedLeanings) {
-            if (leaning_mapper[selectedLeanings[l]] == key) {
-                return true;
-            }
-        }
-        return false;
-    });
-
-    //console.log(filteredDataByLeaning)
-
-    // Append your lines to the SVG
-    filteredDataByLeaning.forEach(function([key, values]) {
-        svg.append("path")
-        .datum(values)
-        .attr("fill", "none")
-        .attr("stroke", color(key))
-        .attr("stroke-width", 4)
-        .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
-        .attr("d", line)
-        .on("mouseover", function() {
-            colorMap(key);
-            d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
-            d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
-
-            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-
-                    checkboxes.forEach(element => {
-                        if (element.id !== "radio-" + key) {
-                            element.disabled = true;
-                        }
-                    });
-        })
-        .on("mouseout", function() {
-            colorMap();
-            d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
-
-            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-
-            checkboxes.forEach(element => {
-                    element.disabled = false;
-            });
-        });
-    });
-
-    // Add the x-axis to your SVG
-    var xAxis = svg.append("g")
-    .attr("transform", "translate(0," + y(0) + ")")
-    .call(d3.axisBottom(x));
-
-    // Move the x-axis labels to the bottom of the grid lines
-    xAxis.selectAll("text")
-    .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
-}
-
-    function graphSurvey(country, date1, date2, svg, type) {
-        var newCountryCodes = {
-            "Austria": "AT",
-            "Belgium": "BE",
-            "Germany": "DE",
-            "Denmark": "DK",
-            "Greece": "EL",
-            "Spain": "ES",
-            "Finland": "FI",
-            "France": "FR",
-            "Ireland": "IE",
-            "Italy": "IT",
-            "Netherlands": "NL",
-            "Portugal": "PT",
-            "Sweden": "SE", 
-        }
-
-        var growthData = [];
-        var allYears = [];
-        for (var year in data[newCountryCodes[country]].surveyGrowth) {
-            if (year >= date1 && year <= date2) {
-                for (var leaning in data[newCountryCodes[country]].surveyGrowth[year]) {
-                    var growth = data[newCountryCodes[country]].surveyGrowth[year][leaning];
-                    //console.log(data[newCountryCodes[country]].surveyGrowth[year][leaning])
-
-                    if (type === "happy") {
-                        growthData.push({
-                            leaning: leaning,
-                            year: year,
-                            growth: growth.happy.cumulative
-                            /**growth: {
-                                "happy": growth.happy,
-                                "satisfaction": growth.satisfaction,
-                                "trust_country": growth.trust_country,
-                                "trust_eu": growth.trust_eu
-                            }**/
-                        });
-                    }
-                    else if (type === "satisfaction") {
-                        growthData.push({
-                            leaning: leaning,
-                            year: year,
-                            growth: growth.satisfaction.cumulative
-                            /**growth: {
-                                "happy": growth.happy,
-                                "satisfaction": growth.satisfaction,
-                                "trust_country": growth.trust_country,
-                                "trust_eu": growth.trust_eu
-                            }**/
-                        });
-                    }
-                    else if (type === "trust_country") {
-                        growthData.push({
-                            leaning: leaning,
-                            year: year,
-                            growth: growth.trust_country.cumulative
-                            /**growth: {
-                                "happy": growth.happy,
-                                "satisfaction": growth.satisfaction,
-                                "trust_country": growth.trust_country,
-                                "trust_eu": growth.trust_eu
-                            }**/
-                        });
-                    }
-                    else if (type === "trust_eu") {
-                        growthData.push({
-                            leaning: leaning,
-                            year: year,
-                            growth: growth.trust_eu.cumulative
-
-                        });
-                    }
-                   
-                    allYears.push(year);
-                }
-            }
-        }
-
-        // Find the min and max growth values
-        var growthMin = d3.min(growthData, function(d) { return d.growth; });
-        var growthMax = d3.max(growthData, function(d) { return d.growth; });
-
-        // Create a scale for your growth data
-        var growthScale = d3.scaleLinear()
-            .domain([growthMin, growthMax])
-            .range([0, 1]);
-
-        // Get the parent container
-        var graphContainer = document.getElementById('graph').parentNode;
-
-        // Remove the old SVG
-        //d3.select("#graph").remove();
-
-        // Get the width and height of the graphContainer
-        var width = graphContainer.clientWidth;
-        var height = graphContainer.clientHeight - 210;
-
-        // Create an SVG in the graphContainer
-        svg = d3.select(graphContainer)
-        .append("svg")
-            .attr("id", "graph")
-            .attr("width", width - 25)
-            .attr("height", height / 1.75);
-
-        // Define margins for the x-axis
-        var xAxisMargin = 50;
-
-        // Create a scale for your x-axis
-        var x = d3.scalePoint()
-        .domain(allYears) 
-        .range([xAxisMargin, width - 25 - xAxisMargin]); // Leave space on both sides of the x-axis
-
-        // Create a scale for your y-axis
-        var y = d3.scaleLinear()
-        .domain([0, 1]) 
-        .range([height / 2, 25]); 
-
-        // Add the y-axis to your SVG
-        svg.append("g")
-        .attr("transform", "translate(" + xAxisMargin + ",0)")
-        .call(d3.axisLeft(y).ticks(5));
-
-        // Add grid lines for each x-axis tick
-        svg.selectAll(".grid-line")
-            .data(x.domain())
-            .enter()
-            .append("line")
-            .attr("class", "grid-line")
-            .attr("stroke", "#ccc") // Change this to the color you want
-            .attr("stroke-opacity", 0.9) // Make the lines slightly opaque
-            .attr("y1", 0)
-            .attr("y2", y(0)) // Adjust this to be the same as the y position of the x-axis
-            .attr("x1", function(d) { return x(d); })
-            .attr("x2", function(d) { return x(d); });
-
-
-        // Define color scale
-        var color = d3.scaleOrdinal()
-        .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-        .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
-
-        // Define your line
-        var line = d3.line()
-            .x(function(d) { return x(d.year); }) 
-            .y(function(d) { return y(d.growth); });
-
-        // Group the data by leaning
-        var dataByLeaning = Array.from(d3.group(growthData, d => d.leaning));
-
-        // Scale the growth data in dataByLeaning
-        dataByLeaning = dataByLeaning.map(([key, values]) => {
-            return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
-        });
-
-        // Filter the data to include only the selected leanings
-        var filteredDataByLeaning = []
-        
-        // Filter the data to include only the selected leanings
-        var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
-            for (var l in selectedLeanings) {
-                if (leaning_mapper[selectedLeanings[l]] == key) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        //console.log(filteredDataByLeaning)
-
-        // Append your lines to the SVG
-        filteredDataByLeaning.forEach(function([key, values]) {
-        svg.append("path")
-        .datum(values)
-        .attr("fill", "none")
-        .attr("stroke", color(key))
-        .attr("stroke-width", 4)
-        .attr("class", "line " + key.replace(/\s+/g, '-'))  // Add a class for easy selection
-        .attr("d", line)
-        .on("mouseover", function() {
-            colorMap(key);
-            d3.selectAll(".line").style("opacity", 0.1);  // Gray out all lines
-            d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
-
-            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-
-                    checkboxes.forEach(element => {
-                        if (element.id !== "radio-" + key) {
-                            element.disabled = true;
-                        }
-                    });
-        })
-        .on("mouseout", function() {
-            colorMap();
-            d3.selectAll(".line").style("opacity", 1);  // Reset the opacity
-
-            var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-
-            checkboxes.forEach(element => {
-                    element.disabled = false;
-            });
-        });
-    });
-
-        // Add the x-axis to your SVG
-        var xAxis = svg.append("g")
-        .attr("transform", "translate(0," + y(0) + ")")
-        .call(d3.axisBottom(x));
-
-        // Move the x-axis labels to the bottom of the grid lines
-        xAxis.selectAll("text")
-        .attr("dy", "1em"); // Adjust this to move the labels below the x-axis
-    }
-
-  
     
     function selectMapMode(radio, type) {
         if (radio.checked) {
@@ -1068,25 +579,17 @@
                 selectedCountryColorFunc = countryColorFuncCumulativeGrowth;
             }
             colorMap();
-           
         }
     }
 
     function selectSurvey(radio, type) {
         if (radio.checked) {
             selectedSurveyType = type;
-
             var graphContainer = document.getElementById('graph').parentNode;
-            
-            // Remove all child elements of the graphContainer
             graphContainer.removeChild(graphContainer.lastChild);
-
-            graphSurvey(selectedCountry, selectedFromDate, selectedToDate, graphContainer, type);
+            displayGraphSurvey(selectedCountry, selectedFromDate, selectedToDate, graphContainer, type);
         }
     }
-
-
-    
 
 </script>
 
