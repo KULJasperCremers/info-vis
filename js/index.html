@@ -261,9 +261,11 @@
                 OnClickCountry(feature.properties.name);
             });
             layer.on('mouseover', function() {
-                if (countryPercentages[feature.properties.name] === "" || document.getElementById("radio-cumulative-growth").checked) {
+                if (countryPercentages[feature.properties.name] === "") {
                     // show tooltip
                     layer.bindTooltip('No growth for this country!').openTooltip();
+                } else if (document.getElementById("radio-cumulative-growth").checked) {
+                    return;
                 } else {
                     d3.selectAll(".line").style("opacity", 0.1);
                     d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
@@ -284,7 +286,7 @@
                 }
             });
             layer.on('mouseout', function() {
-                if (countryPercentages[feature.properties.name] === "" || document.getElementById("radio-cumulative-growth").checked) {
+                if (countryPercentages[feature.properties.name] === "" && document.getElementById("radio-cumulative-growth").checked) {
                     layer.bindTooltip("", {
                         permanent: true,
                         className: 'no-background',
