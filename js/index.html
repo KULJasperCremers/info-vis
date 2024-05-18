@@ -286,7 +286,7 @@
                 }
             });
             layer.on('mouseout', function() {
-                if (countryPercentages[feature.properties.name] === "" && document.getElementById("radio-cumulative-growth").checked) {
+                if (countryPercentages[feature.properties.name] === "") {
                     layer.bindTooltip("", {
                         permanent: true,
                         className: 'no-background',
