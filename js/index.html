@@ -28,17 +28,39 @@
                 <div class="row chart"><h1  class="text-center" id="countryHeader">Country</h1></div>
                 <div id="graph"></div>
             </div>
+            
             <div class="col-1" style="margin-right: -50;" id="radio-leanings">
                 <div  class="chart2" style="margin-top: 110%;">
+                    <p><strong>Map</strong></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-growth" onclick="selectMapMode(this, 'largest-growth')" checked>
+                        <label class="form-check-label" for="radio-largest-growth">
+                            <strong>Largest growth</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-decline" onclick="selectMapMode(this, 'largest-decline')">
+                        <label class="form-check-label" for="radio-largest-decline">
+                            <strong>Largest decline</strong>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radio-map" id="radio-cumulative-growth" onclick="selectMapMode(this, 'cumulative-growth')">
+                        <label class="form-check-label" for="radio-cumulative-growth">
+                            <strong>Cumulative growth</strong>
+                        </label>
+                    </div>
+                </div>
+                <div  class="chart2" style="margin-top: 10%;">
                     <p><strong>Leanings</strong></p>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color: #a6cee3;" onclick="selectLeaning(this, 'Far Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-far-left" style="background-color:#e31a1c ;" onclick="selectLeaning(this, 'Far Left')">
                         <label class="form-check-label" for="radio-far-left">
                         <strong>Far left</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-left" style="background-color: #1f78b4;" onclick="selectLeaning(this, 'Left')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-left" style="background-color: #fb9a99;" onclick="selectLeaning(this, 'Left')">
                         <label class="form-check-label" for="radio-left">
                             <strong>Left</strong>
                         </label>
@@ -56,13 +78,13 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:#fb9a99;" onclick="selectLeaning(this, 'Center Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:#a6cee3;" onclick="selectLeaning(this, 'Center Right')">
                         <label class="form-check-label" for="radio-center-right">
                             <strong>Center Right</strong>
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-right" style="background-color:#e31a1c;" onclick="selectLeaning(this, 'Right')">
+                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-right" style="background-color:#1f78b4;" onclick="selectLeaning(this, 'Right')">
                         <label class="form-check-label" for="radio-right">
                             <strong>Right</strong>
                         </label>
@@ -101,33 +123,12 @@
                         </label>
                     </div>
                 </div>
-                <div  class="chart2" style="margin-top: 10%;">
-                    <p><strong>Map</strong></p>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-growth" style="background-color:#FFCC0D;" onclick="selectMapMode(this, 'largest-growth')" checked>
-                        <label class="form-check-label" for="radio-largest-growth">
-                            <strong>Largest growth</strong>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-largest-decline" style="background-color:#00796B;" onclick="selectMapMode(this, 'largest-decline')">
-                        <label class="form-check-label" for="radio-largest-decline">
-                            <strong>Largest decline</strong>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="radio-map" id="radio-cumulative-growth" style="background-color:#BF2669;" onclick="selectMapMode(this, 'cumulative-growth')">
-                        <label class="form-check-label" for="radio-cumulative-growth">
-                            <strong>Cumulative growth</strong>
-                        </label>
-                    </div>
-                </div>
+
             </div>
             <div class="col">
-            <div class="row chart">
+            <div class="row chart" style="margin-bottom: 5%">
                 <h1 class="text-center">Date Selection</h1>
                 <div class="row">
-                    <p>Between <span id="slider-value-lower"></span> and <span id="slider-value-upper"></span></p>
                     <div style="margin-bottom: 3rem; margin-left: 1rem; margin-right: 1rem;">
                         <div id="slider"></div>
                     </div>
@@ -171,12 +172,12 @@
     var previousSelection;
 
     var leaning_colors = {
-        "far-left": "#a6cee3",
-        "left": "#1f78b4",
+        "far-left": "#e31a1c",
+        "left": "#fb9a99",
         "center-left": "#b2df8a",
         "center": "#33a02c",
-        "center-right": "#fb9a99",
-        "right": "#e31a1c",
+        "center-right": "#a6cee3",
+        "right": "#1f78b4",
         "far-right": "#fdbf6f"
     }
 
@@ -219,6 +220,10 @@
         document.getElementById("radio-right").checked = false;
         document.getElementById("radio-far-right").checked = true;
 
+        document.getElementById("radio-cumulative-growth").checked = false;
+        document.getElementById("radio-largest-decline").checked = false;
+        document.getElementById("radio-largest-growth").checked = true;
+
         selectLeaning(
             document.getElementById("radio-far-right"),
             'Far Right'
@@ -256,6 +261,9 @@
                 OnClickCountry(feature.properties.name);
             });
             layer.on('mouseover', function() {
+                if (document.getElementById("radio-cumulative-growth").checked) {
+                    return;
+                }
                 d3.selectAll(".line").style("opacity", 0.1);
                 d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
 
@@ -336,7 +344,11 @@
             geojsonLayer.eachLayer(function(layer) {
                 if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
                     var newName = countryPercentages[layer.feature.properties.name];
-                    layer.setTooltipContent(newName !== "" ? newName + "%" : " ");
+                    if (newName > 0) {
+                        layer.setTooltipContent(newName !== "" ? "+" + newName + "%" : " ");
+                    } else {
+                        layer.setTooltipContent(newName !== "" ? newName + "%" : " ");
+                    }
                 }
             });
         }
@@ -443,6 +455,11 @@
         });
         var growth = (aggregateLast - aggregateFirst)
         var normalized_growth = (growth + 100) / 200;
+
+        if (Math.round(growth) === 0) {
+            return ["", "gray", ""];
+        }
+
         return [Math.round(growth), interpolateRedGreen(normalized_growth),, ""]
     }
 
@@ -479,6 +496,10 @@
         let largestGrowthEntry = Object.entries(growth).reduce((max, current) => {
             return (max[1] > current[1]) ? max : current;
         })[0]; 
+
+        if (Math.round(growth[largestGrowthEntry]) === 0) {
+            return ["", "gray", ""];
+        }
 
         return [Math.round(growth[largestGrowthEntry]), leaning_colors[largestGrowthEntry], largestGrowthEntry]
     }
@@ -517,6 +538,9 @@
             return (min[1] < current[1]) ? min : current;
         })[0]; 
         
+        if (Math.round(growth[largestDeclinerEntry]) === 0) {
+            return ["", "gray", ""];
+        }
 
         return [Math.round(growth[largestDeclinerEntry]), leaning_colors[largestDeclinerEntry], largestDeclinerEntry]
     }
@@ -529,8 +553,6 @@
         colorBorder();
     }
 
-    let dates;
-
     function timestamp(str) {
         return new Date(str).getFullYear();
     }
@@ -539,16 +561,16 @@
         selectedCountry = country;
         document.getElementById("countryHeader").innerText = country;
 
+        let dates = []
         dates = get_all_dates(data, newCountryCodes[country]);
-        console.log(`dates: ${dates}`)
+        console.log(`dates outside: ${dates}`)
         selectedFromDate = dates.at(0);
-        console.log(`selectedFromDate: ${selectedFromDate}`)
         selectedToDate = dates.at(-1);
-        console.log(`selectedToDate: ${selectedToDate}`)
-        let years = [...new Set(dates.map(date => new Date(date).getFullYear()))];
+        let years = []
+        years = [...new Set(dates.map(date => new Date(date).getFullYear()))];
 
         var slider = document.getElementById('slider');
-        setupSlider(slider, years)
+        setupSlider(slider, dates, years)
 
         colorMap();
         displayGraphs();

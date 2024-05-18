@@ -1,4 +1,4 @@
-function setupSlider(slider, years) {
+function setupSlider(slider, dates, years) {
     console.log(`years: ${years}`)
     var sliderOptions = {
         margin: 0.5,
@@ -17,14 +17,14 @@ function setupSlider(slider, years) {
     };
 
     if (slider.noUiSlider) {
-        slider.noUiSlider.updateOptions(sliderOptions);
-    } else {
-        noUiSlider.create(slider, sliderOptions);
+        slider.noUiSlider.destroy();
     }
+        
+    noUiSlider.create(slider, sliderOptions);
 
     var previousValues = slider.noUiSlider.get().map(Number);
 
-    function handleSlideOrClick() {
+    function handleSlideOrClick(years) {
         var values = slider.noUiSlider.get().map(Number);
         var toMove;
         var indexToMove;
@@ -35,7 +35,22 @@ function setupSlider(slider, years) {
             toMove = values[1];
             indexToMove = 1;
         }
-    
+
+        if ((years[0] === previousValues[0] && years[1] === previousValues[1] && toMove > years[0] && indexToMove == 0) || 
+            (years[years.length - 2] === previousValues[0] && years[years.length - 1] === previousValues[1] && toMove < years[years.length - 1] && indexToMove == 1)) {
+            slider.noUiSlider.set(previousValues);
+            return;
+        }
+
+        for (var i = 1; i < years.length - 2; i++) {
+            if ((years[i] === previousValues[0] && years[i + 1] === previousValues[1] && toMove < years[i]) || 
+                (years[i] === previousValues[1] && years[i + 1] === previousValues[0] && toMove > years[i + 1])) {
+                slider.noUiSlider.set(previousValues);
+                return;
+            }
+        }      
+
+        console.log(`years after: ${years}`)
         var closestYear = years.reduce((prev, curr) => Math.abs(curr - toMove) < Math.abs(prev - toMove) ? curr : prev);
     
         if (values[1 - indexToMove] === closestYear) {
@@ -55,17 +70,8 @@ function setupSlider(slider, years) {
     
         colorMap();
         displayGraphs();
+        userActionInProgress = false;
     }
-    
-    
 
-    slider.noUiSlider.on('click', function() {
-        //console.log('Slider clicked: ', slider.noUiSlider.get());
-        handleSlideOrClick();
-    });
-
-    slider.noUiSlider.on('slide', function() {
-        //console.log('Slider value changed: ', slider.noUiSlider.get());
-        handleSlideOrClick();
-    });
+    slider.noUiSlider.on('slide', () => handleSlideOrClick(years));
 }

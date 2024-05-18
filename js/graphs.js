@@ -49,7 +49,7 @@ function displayGraphElection(country, date1, date2, svg) {
         .attr("width", width - 25)
         .attr("height", height / 1.75);
 
-    var xAxisMargin = 50;
+    var xAxisMargin = 70;
 
     var x = d3.scalePoint()
     .domain(allYears)
@@ -77,7 +77,7 @@ function displayGraphElection(country, date1, date2, svg) {
 
     var color = d3.scaleOrdinal()
     .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-    .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
+    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "a6cee3", "#1f78b4", "#fdbf6f"]);
 
     var line = d3.line()
         .x(function(d) { return x(d.year); })
@@ -150,9 +150,18 @@ function displayGraphElection(country, date1, date2, svg) {
 
     xAxis.selectAll("text")
     .attr("dy", "1em");
+
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x",0 - (height / 4))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Vote Percentages");
 }
 
 function displayGraphSurvey(country, date1, date2, svg, type) {
+    var surveyString = "";
     var growthData = [];
     var allYears = [];
     for (var year in surveyData[countryCodes[country]]) {
@@ -166,6 +175,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
                         year: year,
                         growth: growth.happy
                     })
+                    surveyString = "Happiness"
                 }
                 else if (type === "satisfaction") {
                     growthData.push({
@@ -173,6 +183,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
                         year: year,
                         growth: growth.satisfaction
                     })
+                    surveyString = "Satisfaction"
                 }
                 else if (type === "trust_country") {
                     growthData.push({
@@ -180,6 +191,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
                         year: year,
                         growth: growth.trust_country
                     })
+                    surveyString = "Trust in Country"
                 }
                 else if (type === "trust_eu") {
                     growthData.push({
@@ -187,6 +199,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
                         year: year,
                         growth: growth.trust_eu
                     })
+                    surveyString = "Trust in EU"
                 }
                
                 allYears.push(year);
@@ -212,7 +225,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
         .attr("width", width - 25)
         .attr("height", height / 1.75);
 
-    var xAxisMargin = 50;
+    var xAxisMargin = 70;
 
     var x = d3.scalePoint()
     .domain(allYears) 
@@ -227,21 +240,20 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .call(d3.axisLeft(y).ticks(5));
 
     svg.selectAll(".grid-line")
-        .data(x.domain())
-        .enter()
-        .append("line")
-        .attr("class", "grid-line")
-        .attr("stroke", "#ccc")
-        .attr("stroke-opacity", 0.9) 
-        .attr("y1", 0)
-        .attr("y2", y(0))
-        .attr("x1", function(d) { return x(d); })
-        .attr("x2", function(d) { return x(d); });
-
-
+    .data(x.domain())
+    .enter()
+    .append("line")
+    .attr("class", "grid-line")
+    .attr("stroke", "#ccc")
+    .attr("stroke-opacity", 0.9) 
+    .attr("y1", 0) // Top of the graph
+    .attr("y2", height / 2) // Bottom of the graph
+    .attr("x1", function(d) { return x(d); })
+    .attr("x2", function(d) { return x(d); });
+    
     var color = d3.scaleOrdinal()
     .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-    .range(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f"]);
+    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "a6cee3", "#1f78b4", "#fdbf6f"]);
 
     var line = d3.line()
         .x(function(d) { return x(d.year); }) 
@@ -280,6 +292,14 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
 
     xAxis.selectAll("text")
     .attr("dy", "1em"); 
+
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x",0 - (height / 4))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text(`${surveyString} Scores`);
 }
 
 
@@ -313,7 +333,7 @@ function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
         .attr("width", width - 25)
         .attr("height", height / 1.75);
 
-    var xAxisMargin = 50;
+    var xAxisMargin = 70;
 
     var x0 = d3.scaleBand()
         .domain(allYears)
@@ -369,4 +389,24 @@ function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
     svgBarChart.append("g")
         .attr("transform", "translate(" + xAxisMargin + ",0)")
         .call(d3.axisLeft(y));
+
+    svgBarChart.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x",0 - (height / 4))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("All Survey Scores");
+
+    var yAxis = svgBarChart.append("g")
+    .attr("transform", "translate(" + xAxisMargin + ",0)")
+    .call(d3.axisLeft(y));
+
+    yAxis.selectAll("g.tick")
+        .append("line")
+        .classed("grid-line", true)
+        .attr("stroke", "#ccc")
+        .attr("opacity", 0.5)
+        .attr("x1", 0)
+        .attr("x2", width - 2 * xAxisMargin);
 }
