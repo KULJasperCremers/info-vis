@@ -77,7 +77,7 @@ function displayGraphElection(country, date1, date2, svg) {
 
     var color = d3.scaleOrdinal()
     .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "a6cee3", "#1f78b4", "#fdbf6f"]);
+    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "#a6cee3", "#1f78b4", "#fdbf6f"]);
 
     var line = d3.line()
         .x(function(d) { return x(d.year); })
@@ -250,10 +250,10 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .attr("y2", height / 2) // Bottom of the graph
     .attr("x1", function(d) { return x(d); })
     .attr("x2", function(d) { return x(d); });
-    
+
     var color = d3.scaleOrdinal()
     .domain(["far-left", "left", "center-left", "center", "center-right", "right", "far-right"])
-    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "a6cee3", "#1f78b4", "#fdbf6f"]);
+    .range(["#e31a1c", "#fb9a99", "#b2df8a", "#33a02c", "#a6cee3", "#1f78b4", "#fdbf6f"]);
 
     var line = d3.line()
         .x(function(d) { return x(d.year); }) 
@@ -284,6 +284,27 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .attr("stroke-width", 4)
     .attr("class", "line " + key.replace(/\s+/g, '-'))
     .attr("d", line)
+    .on("mouseover", function() {
+        colorMap(key);
+        d3.selectAll(".line").style("opacity", 0.1);  
+        d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+
+        var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+        checkboxes.forEach(element => {
+            if (element.id !== "radio-" + key) {
+                element.disabled = true;
+            }
+        });
+    })
+    .on("mouseout", function() {
+        colorMap();
+        d3.selectAll(".line").style("opacity", 1);
+
+        var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+        checkboxes.forEach(element => {
+                element.disabled = false;
+        });
+    });
     });
 
     var xAxis = svg.append("g")

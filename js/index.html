@@ -79,7 +79,7 @@
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="radio-center-right" style="background-color:#a6cee3;" onclick="selectLeaning(this, 'Center Right')">
-                        <label class="form-check-label" for="radio-center-right">
+                        <label class="form-check-label" for="radio-center-right">                                                              
                             <strong>Center Right</strong>
                         </label>
                     </div>
@@ -261,28 +261,37 @@
                 OnClickCountry(feature.properties.name);
             });
             layer.on('mouseover', function() {
-                if (document.getElementById("radio-cumulative-growth").checked) {
-                    return;
+                if (countryPercentages[feature.properties.name] === "" || document.getElementById("radio-cumulative-growth").checked) {
+                    // show tooltip
+                    layer.bindTooltip('No growth for this country!').openTooltip();
+                } else {
+                    d3.selectAll(".line").style("opacity", 0.1);
+                    d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
+                    var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
+                    checkboxes.forEach(element => {
+                        if (element.id !== "radio-" + countryLargest[feature.properties.name]) {
+                            element.disabled = true;
+                        }
+                    });
+                    // bar chart switch!!
+                    displayGraphs(true, countryLargest[feature.properties.name])
+                    radios.forEach((radio) => {
+                        if (radio.checked) {
+                            previousSelection = radio;
+                            radio.checked = false;
+                        }
+                    });
                 }
-                d3.selectAll(".line").style("opacity", 0.1);
-                d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
-
-                var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
-                checkboxes.forEach(element => {
-                    if (element.id !== "radio-" + countryLargest[feature.properties.name]) {
-                        element.disabled = true;
-                    }
-                });
-                // bar chart switch!!
-                displayGraphs(true, countryLargest[feature.properties.name])
-                radios.forEach((radio) => {
-                    if (radio.checked) {
-                        previousSelection = radio;
-                        radio.checked = false;
-                    }
-                });
             });
             layer.on('mouseout', function() {
+                if (countryPercentages[feature.properties.name] === "" || document.getElementById("radio-cumulative-growth").checked) {
+                    layer.bindTooltip("", {
+                        permanent: true,
+                        className: 'no-background',
+                        direction: 'center',
+                        offset: [0, 0] 
+                    });    
+                } 
                 d3.selectAll(".line").style("opacity", 1);
 
                 var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
