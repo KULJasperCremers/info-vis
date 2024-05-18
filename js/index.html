@@ -249,24 +249,32 @@
             onEachFeature: function(feature, layer) {
 
                 if (feature.properties && feature.properties.name) {
-                    layer.bindTooltip(feature.properties.name, {
-                    permanent: true,
-                    className: 'no-background',
-                    direction: 'center',
-                    offset: [0, 0] 
-                });
-            }
+                        layer.bindTooltip(feature.properties.name, {
+                        permanent: true,
+                        className: 'no-background',
+                        direction: 'center',
+                        offset: [0, 0] 
+                    });
+                }
 
             layer.on('click', function() {
                 OnClickCountry(feature.properties.name);
             });
             layer.on('mouseover', function() {
+
                 if (countryPercentages[feature.properties.name] === "") {
-                    // show tooltip
-                    layer.bindTooltip('No growth for this country!').openTooltip();
-                } else if (document.getElementById("radio-cumulative-growth").checked) {
+                    layer.bindTooltip("No growth for this country!", {
+                        permanent: false,
+                        direction: 'center',
+                        offset: [0, 0]
+                    }).openTooltip();
+                }
+
+                if (document.getElementById("radio-cumulative-growth").checked) {
                     return;
-                } else {
+                }
+
+                if (countryPercentages[feature.properties.name] !== "") {
                     d3.selectAll(".line").style("opacity", 0.1);
                     d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
                     var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
@@ -286,14 +294,9 @@
                 }
             });
             layer.on('mouseout', function() {
-                if (countryPercentages[feature.properties.name] === "") {
-                    layer.bindTooltip("", {
-                        permanent: true,
-                        className: 'no-background',
-                        direction: 'center',
-                        offset: [0, 0] 
-                    });    
-                } 
+                if (layer.getTooltip() && !layer.getTooltip().options.permanent) {
+                    layer.unbindTooltip();
+                }
                 d3.selectAll(".line").style("opacity", 1);
 
                 var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
@@ -356,9 +359,30 @@
                 if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
                     var newName = countryPercentages[layer.feature.properties.name];
                     if (newName > 0) {
-                        layer.setTooltipContent(newName !== "" ? "+" + newName + "%" : " ");
-                    } else {
-                        layer.setTooltipContent(newName !== "" ? newName + "%" : " ");
+                        layer.unbindTooltip();
+                        layer.bindTooltip(newName !== "" ? "+" + newName + "%" : " ", {
+                            permanent: true,
+                            className: 'no-background',
+                            direction: 'center',
+                            offset: [0, 0] 
+                        });
+                    } else if (newName < 0) {
+                        layer.unbindTooltip();
+                        layer.bindTooltip(newName !== "" ? newName + "%" : " ", {
+                            permanent: true,
+                            className: 'no-background',
+                            direction: 'center',
+                            offset: [0, 0] 
+                        });
+                    }
+                    else {
+                        layer.unbindTooltip();
+                        layer.bindTooltip("", {
+                            permanent: true,
+                            className: 'no-background',
+                            direction: 'center',
+                            offset: [0, 0] 
+                        });
                     }
                 }
             });
