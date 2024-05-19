@@ -44,12 +44,13 @@
     .chart2 {
         background-color: #ffffff;
         border-radius: 10px;
-        padding: 1rem;
+        padding:15px;
+        margin-right: -40px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .noUi-connect {
-        background: #a6cee3; /* Bright blue background for the connected area */
+        background: #AAD3DF; /* Bright blue background for the connected area */
     }
 
     .noUi-handle {

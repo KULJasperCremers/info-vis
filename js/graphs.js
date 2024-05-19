@@ -42,7 +42,7 @@ function displayGraphElection(country, date1, date2, svg) {
     var growthMax = d3.max(growthData, function(d) { return d.growth; });
 
     var growthScale = d3.scaleLinear()
-        .domain([growthMin, growthMax])
+    .domain([growthMin, growthMax + growthMax * 0.1])
         .range([growthMin, growthMax]);
 
     var graphContainer = document.getElementById('graph').parentNode;
@@ -253,7 +253,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     var growthMax = d3.max(growthData, function(d) { return d.growth; });
 
     var growthScale = d3.scaleLinear()
-        .domain([growthMin, growthMax])
+        .domain([growthMin, growthMax + growthMax * 0.05])
         .range([growthMin, growthMax]);
 
     var graphContainer = document.getElementById('graph').parentNode;
