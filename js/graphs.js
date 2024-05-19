@@ -14,6 +14,13 @@ var countryCodes = {
     "Sweden": "SE",
 }
 
+var filteredDataByLeaning;
+var xPositions = {};
+
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
 function displayGraphElection(country, date1, date2, svg) {
     var growthData = [];
     var allYears = [];
@@ -51,11 +58,11 @@ function displayGraphElection(country, date1, date2, svg) {
 
     var xAxisMargin = 70;
 
-    var x = d3.scalePoint()
+    x = d3.scalePoint()
     .domain(allYears)
     .range([xAxisMargin, width - 25 - xAxisMargin]); 
 
-    var y = d3.scaleLinear()
+    y = d3.scaleLinear()
     .domain([growthMin, growthMax])
     .range([height / 2 - 20, 25]);
 
@@ -89,7 +96,7 @@ function displayGraphElection(country, date1, date2, svg) {
         return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
     });
 
-    var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
+    filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
         for (var l in selectedLeanings) {
             if (leaning_mapper[selectedLeanings[l]] == key) {
                 return true;
@@ -99,6 +106,12 @@ function displayGraphElection(country, date1, date2, svg) {
     });
 
     filteredDataByLeaning.forEach(function([key, values]) {
+        values.forEach(function(d) {
+            var xPos = x(d.year);
+            var yPos = y(d.growth)-10;
+            xPositions[d.year] = {x: xPos, y: yPos}
+        });
+
         svg.append("path")
         .datum(values)
         .attr("fill", "none")
@@ -111,6 +124,16 @@ function displayGraphElection(country, date1, date2, svg) {
             d3.selectAll(".line").style("opacity", 0.1);  
             d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
 
+            values.forEach(function(d) {
+                var xPos = x(d.year);
+                var yPos = y(d.growth)-10;
+                svg.append("text")
+                .attr("x", xPos) 
+                .attr("y", yPos) 
+                .attr("class", "x-value")
+                .text(d.growth.toFixed(1));
+            });
+    
             var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
             checkboxes.forEach(element => {
                 if (element.id !== "radio-" + key) {
@@ -130,6 +153,8 @@ function displayGraphElection(country, date1, date2, svg) {
         .on("mouseout", function() {
             colorMap();
             d3.selectAll(".line").style("opacity", 1);
+
+            d3.selectAll(".x-value").remove();
 
             var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
             checkboxes.forEach(element => {
@@ -158,6 +183,23 @@ function displayGraphElection(country, date1, date2, svg) {
     .attr("dy", "1em")
     .style("text-anchor", "middle")
     .text("Vote Percentages");
+
+    svg.append("rect")
+        .attr("x",  (width * 1.5) / 4) 
+        .attr("y", 0)
+        .attr("width", width / 4) 
+        .attr("height", 50) 
+        .attr("fill", "#e2e2e2"); 
+
+
+        svg.append("text")
+        .attr("x", (width - 25) / 2) 
+        .attr("y", 30) 
+        .attr("text-anchor", "middle") 
+        .style("font-size", "24px") 
+        .text("Election Growth"); 
+
+    return svg
 }
 
 function displayGraphSurvey(country, date1, date2, svg, type) {
@@ -289,6 +331,14 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
         d3.selectAll(".line").style("opacity", 0.1);  
         d3.selectAll("." + key.replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
 
+        values.forEach(function(d) {
+            svg.append("text")
+            .attr("x", x(d.year)) 
+            .attr("y", y(d.growth)-10) 
+            .attr("class", "x-value")
+            .text(d.growth.toFixed(1));
+        });
+
         var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
         checkboxes.forEach(element => {
             if (element.id !== "radio-" + key) {
@@ -299,6 +349,8 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .on("mouseout", function() {
         colorMap();
         d3.selectAll(".line").style("opacity", 1);
+
+        d3.selectAll(".x-value").remove();
 
         var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
         checkboxes.forEach(element => {
@@ -320,7 +372,21 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .attr("x",0 - (height / 4))
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .text(`${surveyString} Scores`);
+    .text(`Scores (0-10)`);
+
+    svg.append("rect")
+    .attr("x",  (width * 1.5) / 4)
+    .attr("y", 0) 
+    .attr("width", width / 4) 
+    .attr("height", 50) 
+    .attr("fill", "#e2e2e2");
+
+    svg.append("text")
+    .attr("x", (width - 25) / 2) 
+    .attr("y", 30) 
+    .attr("text-anchor", "middle") 
+    .style("font-size", "24px") 
+    .text(surveyString);
 }
 
 
@@ -417,7 +483,7 @@ function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
     .attr("x",0 - (height / 4))
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .text("All Survey Scores");
+    .text("Scores (0-10)");
 
     var yAxis = svgBarChart.append("g")
     .attr("transform", "translate(" + xAxisMargin + ",0)")
@@ -430,4 +496,18 @@ function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
         .attr("opacity", 0.5)
         .attr("x1", 0)
         .attr("x2", width - 2 * xAxisMargin);
+
+        svgBarChart.append("rect")
+        .attr("x",  (width * 1.5) / 4)
+        .attr("y", 0) 
+        .attr("width", width / 4 - 40) 
+        .attr("height", 50) 
+        .attr("fill","#e2e2e2");
+
+        svgBarChart.append("text")
+            .attr("x", (width - 25) / 2) 
+            .attr("y", 40) 
+            .attr("text-anchor", "middle") 
+            .style("font-size", "24px") 
+            .text("All Surveys");
 }

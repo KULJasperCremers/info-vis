@@ -185,6 +185,8 @@
     let countryLargest = {} 
     let countryPercentages = {}
 
+    var graphSvg
+
     /*d3.json("../json/ess_data_all.json").then(function(d) {
         aggregateSurveyMeansForAllCountries(d);
         aggregateElectionDataForAllCountries(d);
@@ -283,6 +285,20 @@
                             element.disabled = true;
                         }
                     });
+
+                    var values = filteredDataByLeaning.find(([key, values]) => key === countryLargest[feature.properties.name])[1];
+
+                    values.forEach(function(d) {
+                        var position = xPositions[d.year];
+                        if (position) {
+                            graphSvg.append("text")
+                            .attr("x", position.x) 
+                            .attr("y", position.y) 
+                            .attr("class", "x-value")
+                            .text(d.growth.toFixed(1));
+                        }
+                    });
+
                     // bar chart switch!!
                     displayGraphs(true, countryLargest[feature.properties.name])
                     radios.forEach((radio) => {
@@ -438,11 +454,11 @@
             .attr("class", "text-center")
             .text(selectedCountry);
     
-            var svg = d3.select(graphContainer)
+            svg = d3.select(graphContainer)
                 .append("div")
                 .attr("id", "graph");
     
-            displayGraphElection(selectedCountry, selectedFromDate, selectedToDate, svg);
+            graphSvg = displayGraphElection(selectedCountry, selectedFromDate, selectedToDate, svg);
     
             displayGraphSurvey(selectedCountry, selectedFromDate, selectedToDate, svg, selectedSurveyType);
         }
