@@ -220,17 +220,11 @@
         document.getElementById("radio-center").checked = false;
         document.getElementById("radio-center-right").checked = false;
         document.getElementById("radio-right").checked = false;
-        document.getElementById("radio-far-right").checked = true;
+        document.getElementById("radio-far-right").checked = false;
 
         document.getElementById("radio-cumulative-growth").checked = false;
         document.getElementById("radio-largest-decline").checked = false;
         document.getElementById("radio-largest-growth").checked = true;
-
-        selectLeaning(
-            document.getElementById("radio-far-right"),
-            'Far Right'
-        )
-
 
         previousSelection = document.getElementById("radio-happy");
         previousSelection.checked = true
@@ -354,7 +348,14 @@
         if (geojsonLayer) {
 
             for (let key in countryCodes) {
-                var outp = selectedCountryColorFunc(key);
+                var outp;
+                if (selectedLeanings.length === 0) {
+                    outp = countryTransparentColorFunc(key);
+                }
+                else {
+                    outp = selectedCountryColorFunc(key);
+                }
+
                 countryPercentages[key] = outp[0];
                 countryColors[key] = outp[1];
                 countryLargest[key] = outp[2];
@@ -477,7 +478,11 @@
     }
 
     function countryColorFunc(country) {
-        return ["", "white"];
+        return ["", "white", ""];
+    }
+
+    function countryTransparentColorFunc(country) {
+        return ["", "transparent", ""];
     }
 
     function countryColorFuncCumulativeGrowth(country) {
@@ -489,7 +494,7 @@
         var dates = Object.keys(leaning_data);
 
         if (dates.length < 2) {
-            return ["", "white", ""];
+            return 
         }
 
         first = leaning_data[dates[0]]
