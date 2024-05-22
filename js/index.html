@@ -488,6 +488,10 @@
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
+        if (dates.length < 2) {
+            return;
+        }
+
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
 
