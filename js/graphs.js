@@ -307,9 +307,9 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
         return [key, values.map(d => ({...d, growth: growthScale(d.growth)}))];
     });
 
-    var filteredDataByLeaning = []
+    var filteredDataByLeaning2 = []
     
-    var filteredDataByLeaning = dataByLeaning.filter(function([key, values]) {
+    var filteredDataByLeaning2 = dataByLeaning.filter(function([key, values]) {
         for (var l in selectedLeanings) {
             if (leaning_mapper[selectedLeanings[l]] == key) {
                 return true;
@@ -318,7 +318,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
         return false;
     });
 
-    filteredDataByLeaning.forEach(function([key, values]) {
+    filteredDataByLeaning2.forEach(function([key, values]) {
     svg.append("path")
     .datum(values)
     .attr("fill", "none")
@@ -337,6 +337,18 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
             .attr("y", y(d.growth)-10) 
             .attr("class", "x-value")
             .text(d.growth.toFixed(1));
+        });
+
+        var vals = filteredDataByLeaning.find(([leaning, v]) => key === leaning)[1];
+        vals.forEach(function(d) {
+            var position = xPositions[d.year];
+            if (position) {
+                graphSvg.append("text")
+                .attr("x", position.x) 
+                .attr("y", position.y) 
+                .attr("class", "x-value")
+                .text(d.growth.toFixed(1));
+            }
         });
 
         var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');

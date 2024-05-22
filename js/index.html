@@ -315,6 +315,8 @@
                 }
                 d3.selectAll(".line").style("opacity", 1);
 
+                d3.selectAll(".x-value").remove();
+
                 var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
                 checkboxes.forEach(element => {
                         element.disabled = false;
