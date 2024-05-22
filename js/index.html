@@ -524,8 +524,14 @@
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
 
+        if(dates.length < 2) {
+            return ["", "white", ""];
+        }
+
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
+
+        console.log(dates);
 
         var growth = {};
 
@@ -534,7 +540,7 @@
             var mapped_leaning = leaning_mapper[l];
            
             if (
-                first != undefined && last !== undefined && 
+                first !== undefined && last !== undefined && 
                 last[mapped_leaning] !== undefined &&  first[mapped_leaning] !== undefined
             ) { 
                 if (growth[mapped_leaning] === undefined) {
@@ -544,6 +550,8 @@
                 growth[mapped_leaning] = last[mapped_leaning] - first[mapped_leaning];
             }
         });
+
+        console.log(growth);
 
         
         let largestGrowthEntry = Object.entries(growth).reduce((max, current) => {
@@ -564,6 +572,11 @@
 
         var leaning_data = get_percentage_leaning_data_between(data, newCountryCodes[country], selectedFromDate, selectedToDate);
         var dates = Object.keys(leaning_data);
+
+        
+        if(dates.length < 2) {
+            return ["", "white", ""];
+        }
 
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
