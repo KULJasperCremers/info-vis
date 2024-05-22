@@ -409,7 +409,6 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
     .text(surveyString);
 }
 
-
 function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
     var growthData = [];
     var allYears = [];
@@ -461,30 +460,37 @@ function displayBarGraphSurvey(country, date1, date2, svgBarChart, leaning) {
         .range(["#FFCC0D", "#00796B", "#BF2669", "#637d92"]);
 
     var transformedData = growthData.map(function(d) {
+        var values = [
+            {category: "happy", value: d.happy},
+            {category: "satisfaction", value: d.satisfaction},
+            {category: "trust_country", value: d.trust_country},
+            {category: "trust_eu", value: d.trust_eu}
+        ];
+        values.sort(function(a, b) { return a.value - b.value; });
+        console.log(values)
         return {
             year: d.year,
-            values: [
-                {category: "happy", value: d.happy},
-                {category: "satisfaction", value: d.satisfaction},
-                {category: "trust_country", value: d.trust_country},
-                {category: "trust_eu", value: d.trust_eu}
-            ]
+            values: values
         };
     });
 
     svgBarChart.selectAll(".year")
-        .data(transformedData)
-        .enter().append("g")
-        .attr("class", "year")
-        .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; })
-        .selectAll("rect")
-        .data(function(d) { return d.values; })
-        .enter().append("rect")
-        .attr("width", x1.bandwidth())
-        .attr("x", function(d) { return x1(d.category); })
-        .attr("y", function(d) { return y(d.value); })
-        .attr("height", function(d) { return height / 2 - y(d.value); })
-        .attr("fill", function(d) { return color(d.category); });
+    .data(transformedData)
+    .enter().append("g")
+    .attr("class", "year")
+    .attr("transform", function(d) { return "translate(" + x0(d.year) + ",0)"; })
+    .each(function(d) {
+        // Update the x1 scale domain for each year based on the sorted values
+        x1.domain(d.values.map(function(v) { return v.category; }));
+        d3.select(this).selectAll("rect")
+            .data(d.values)
+            .enter().append("rect")
+            .attr("width", x1.bandwidth())
+            .attr("x", function(v) { return x1(v.category); })
+            .attr("y", function(v) { return y(v.value); })
+            .attr("height", function(v) { return height / 2 - y(v.value); })
+            .attr("fill", function(v) { return color(v.category); });
+    });
         
     var xAxis = svgBarChart.append("g")
         .attr("transform", "translate(0," + y(0) + ")")
