@@ -15,7 +15,15 @@ var countryCodes = {
 }
 
 var filteredDataByLeaning;
-var xPositions = {};
+var xPositions = { 
+    "far-right": {},
+    "right": {},
+    "center-right": {},
+    "center": {},
+    "center-left": {},
+    "left": {},
+    "far-left": {}
+};
 
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
@@ -109,7 +117,7 @@ function displayGraphElection(country, date1, date2, svg) {
         values.forEach(function(d) {
             var xPos = x(d.year);
             var yPos = y(d.growth)-10;
-            xPositions[d.year] = {x: xPos, y: yPos}
+            xPositions[key][d.year] = {x: xPos, y: yPos}
         });
 
         svg.append("path")
@@ -341,7 +349,7 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
 
         var vals = filteredDataByLeaning.find(([leaning, v]) => key === leaning)[1];
         vals.forEach(function(d) {
-            var position = xPositions[d.year];
+            var position = xPositions[leaning][d.year];
             if (position) {
                 graphSvg.append("text")
                 .attr("x", position.x) 

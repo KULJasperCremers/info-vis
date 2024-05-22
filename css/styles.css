@@ -69,3 +69,12 @@
         font-weight: 750;
         font-size: 22px;              /* Smaller text size */
     }
+
+    .leaflet-tooltip.no-background-grayed {
+        background: transparent;      /* No background */
+        border: none;                 /* No borders */
+        box-shadow: none;             /* No shadow */
+        color: gray;                 /* Text color */
+        font-weight: 750;
+        font-size: 22px;              /* Smaller text size */
+    }

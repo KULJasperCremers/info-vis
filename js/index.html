@@ -181,11 +181,11 @@
         "far-right": "#fdbf6f"
     }
 
-    let countryColors = {}
-    let countryLargest = {} 
-    let countryPercentages = {}
+    let countryColors = {};
+    let countryLargest = {};
+    let countryPercentages = {};
 
-    var graphSvg
+    var graphSvg;
 
     /*d3.json("../json/ess_data_all.json").then(function(d) {
         aggregateSurveyMeansForAllCountries(d);
@@ -270,6 +270,8 @@
                     return;
                 }
 
+                colorMap(countryLargest[feature.properties.name]);
+
                 if (countryPercentages[feature.properties.name] !== "") {
                     d3.selectAll(".line").style("opacity", 0.1);
                     d3.selectAll("." + countryLargest[feature.properties.name].replace(/\s+/g, '-')).style("opacity", 1);  // Highlight the hovered line
@@ -283,7 +285,7 @@
                     var values = filteredDataByLeaning.find(([key, values]) => key === countryLargest[feature.properties.name])[1];
 
                     values.forEach(function(d) {
-                        var position = xPositions[d.year];
+                        var position = xPositions[countryLargest[feature.properties.name]][d.year];
                         if (position) {
                             graphSvg.append("text")
                             .attr("x", position.x) 
@@ -310,6 +312,8 @@
                 d3.selectAll(".line").style("opacity", 1);
 
                 d3.selectAll(".x-value").remove();
+
+                colorMap();
 
                 var checkboxes = document.querySelectorAll('#radio-leanings .form-check-input[type="checkbox"]');
                 checkboxes.forEach(element => {
@@ -377,19 +381,26 @@
             geojsonLayer.eachLayer(function(layer) {
                 if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
                     var newName = countryPercentages[layer.feature.properties.name];
+
+                    var grayedOut = false;
+
+                    if(leaning !== undefined) {
+                        grayedOut = countryLargest[layer.feature.properties.name] !== leaning;
+                    }
+
                     if (newName > 0) {
                         layer.unbindTooltip();
                         layer.bindTooltip(newName !== "" ? "+" + newName + "%" : " ", {
                             permanent: true,
-                            className: 'no-background',
+                            className: grayedOut ? 'no-background-grayed' : 'no-background',
                             direction: 'center',
                             offset: [0, 0] 
                         });
-                    } else if (newName < 0) {
+                    } else if (newName < 0) {   
                         layer.unbindTooltip();
                         layer.bindTooltip(newName !== "" ? newName + "%" : " ", {
                             permanent: true,
-                            className: 'no-background',
+                            className: grayedOut ? 'no-background-grayed' : 'no-background',
                             direction: 'center',
                             offset: [0, 0] 
                         });
@@ -398,7 +409,7 @@
                         layer.unbindTooltip();
                         layer.bindTooltip("", {
                             permanent: true,
-                            className: 'no-background',
+                            className: grayedOut ? 'no-background-grayed' : 'no-background',
                             direction: 'center',
                             offset: [0, 0] 
                         });
@@ -428,8 +439,6 @@
         } else {
             selectedLeanings.push(leaning);
         }
-
-        console.log(selectedLeanings);
 
         colorMap();
         displayGraphs();
@@ -540,8 +549,6 @@
         first = leaning_data[dates[0]]
         last = leaning_data[dates.at(-1)]
 
-        console.log(dates);
-
         var growth = {};
 
         selectedLeanings.forEach(l => {
@@ -560,9 +567,6 @@
             }
         });
 
-        console.log(growth);
-
-        
         let largestGrowthEntry = Object.entries(growth).reduce((max, current) => {
             return (max[1] > current[1]) ? max : current;
         })[0]; 
@@ -638,7 +642,6 @@
 
         let dates = []
         dates = get_all_dates(data, newCountryCodes[country]);
-        console.log(`dates outside: ${dates}`)
         selectedFromDate = dates.at(0);
         selectedToDate = dates.at(-1);
         let years = []
