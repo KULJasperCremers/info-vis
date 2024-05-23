@@ -347,9 +347,10 @@ function displayGraphSurvey(country, date1, date2, svg, type) {
             .text(d.growth.toFixed(1));
         });
 
-        var vals = filteredDataByLeaning.find(([leaning, v]) => key === leaning)[1];
-        vals.forEach(function(d) {
-            var position = xPositions[leaning][d.year];
+        var vals = filteredDataByLeaning.find(([leaning, v]) => key === leaning);
+        vals[1].forEach(function(d) {
+            var position = xPositions[d.leaning][d.year];
+            // console.log(position)
             if (position) {
                 graphSvg.append("text")
                 .attr("x", position.x) 
