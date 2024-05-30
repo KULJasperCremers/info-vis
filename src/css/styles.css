@@ -1,0 +1,80 @@
+
+    
+    .minimized {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        border-style: groove;
+        z-index: 1000; /* Ensure it sits on top of other content */
+    }
+
+    .maximized {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Example height - adjust as needed */
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .flex-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .flex-container h1 {
+        margin-right: 20px; 
+    }
+
+    body {
+        background-color: #e2e2e2; /* Light grey background color */
+    }
+    
+    .chart {
+        background-color: #ffffff;
+        border-radius: 10px;
+        margin: 10px;
+        margin-left: 50px;
+        margin-right: 50px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .chart2 {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding:15px;
+        margin-right: -40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .noUi-connect {
+        background: #AAD3DF; /* Bright blue background for the connected area */
+    }
+
+    .noUi-handle {
+        background: darkgrey; /* Bright red background for the handles */
+        border-radius: 100%; /* Makes the handle circular */
+        cursor: pointer; /* Changes cursor to a pointer when hovering over the handles */
+    }
+
+    #map { height: 44.1rem; }
+
+    .leaflet-tooltip.no-background {
+        background: transparent;      /* No background */
+        border: none;                 /* No borders */
+        box-shadow: none;             /* No shadow */
+        color: black;                 /* Text color */
+        font-weight: 750;
+        font-size: 22px;              /* Smaller text size */
+    }
+
+    .leaflet-tooltip.no-background-grayed {
+        background: transparent;      /* No background */
+        border: none;                 /* No borders */
+        box-shadow: none;             /* No shadow */
+        color: gray;                 /* Text color */
+        font-weight: 750;
+        font-size: 22px;              /* Smaller text size */
+    }
